@@ -1,0 +1,49 @@
+---
+import type { YouTubeVideo } from '../lib/youtube';
+
+interface Props {
+  video: YouTubeVideo;
+}
+
+const { video } = Astro.props;
+
+const formattedDate = video.published.toLocaleDateString('ja-JP', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+---
+
+<li class="work">
+  <div class="work__main">
+    <a class="work__title" href={video.url} target="_blank" rel="noopener noreferrer">
+      {video.title}
+    </a>
+    <p class="meta">
+      {formattedDate}
+      <span class="work__sep">·</span>
+      {video.sourceLabel}
+    </p>
+  </div>
+</li>
+
+<style>
+  .work__title {
+    font-size: 0.95rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+
+  .work__title:hover {
+    opacity: 0.6;
+  }
+
+  .work__sep {
+    margin: 0 0.35rem;
+  }
+
+  .meta {
+    margin: 0.35rem 0 0;
+  }
+</style>

@@ -4,37 +4,21 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="footer">
-  <div class="footer__inner bubble-card">
-    <p class="footer__brand">
-      <span aria-hidden="true">{site.heroEmoji}</span>
-      {site.name}
-    </p>
-    <p class="footer__copy">&copy; {year} {site.name}. All rights reserved.</p>
-    <p class="footer__note">Built with Astro · babytato.link</p>
-  </div>
+  <p>&copy; {year} {site.name}</p>
 </footer>
 
 <style>
   .footer {
-    width: min(calc(100% - 2rem), var(--max-width));
-    margin: 0 auto 2rem;
+    width: min(calc(100% - 2.5rem), var(--max-width));
+    margin: 0 auto;
+    padding: 2rem 0 3rem;
+    border-top: 1px solid var(--color-line);
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
   }
 
-  .footer__inner {
-    padding: 1.5rem;
-    text-align: center;
-    background: linear-gradient(135deg, var(--pop-yellow), var(--pop-pink));
-  }
-
-  .footer__brand {
+  .footer p {
     margin: 0;
-    font-size: 1.25rem;
-    font-weight: 800;
-  }
-
-  .footer__copy,
-  .footer__note {
-    margin: 0.35rem 0 0;
-    font-size: 0.9rem;
   }
 </style>

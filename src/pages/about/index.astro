@@ -3,119 +3,48 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { site } from '../../data/site';
 ---
 
-<BaseLayout title="About" description={`${site.name} のプロフィール`}>
-  <header class="page-header">
-    <h1 class="page-title">✨ About</h1>
-    <p class="page-lead">プロフィールと活動について。</p>
-  </header>
+<BaseLayout title="about" description="tato について。">
+  <h1 class="page-title">about</h1>
 
-  <section class="about bubble-card">
-    <div class="about__profile">
-      <img
-        class="about__avatar"
-        src={site.profile.avatar}
-        alt={`${site.name} のプロフィール画像`}
-        width="180"
-        height="180"
-      />
-      <div>
-        <h2 class="about__name">{site.profile.name}</h2>
-        <p class="about__bio">{site.profile.bio}</p>
-      </div>
-    </div>
+  <div class="about section">
+    {
+      site.profile.paragraphs.map((paragraph) => (
+        <p>{paragraph}</p>
+      ))
+    }
 
-    <div class="about__details">
-      <div class="about__block">
-        <h3>🎤 活動内容</h3>
-        <p>歌ってみた動画、オリジナル曲、ライブ配信などを中心に活動しています。</p>
-      </div>
-      <div class="about__block">
-        <h3>💡 好きなこと</h3>
-        <p>ポップで明るい曲、可愛いビジュアル、みんなと一緒に盛り上がるライブ。</p>
-      </div>
-      <div class="about__block">
-        <h3>📬 お仕事</h3>
-        <p>
-          コラボ・イベント出演などのお問い合わせは
-          <a href="/links/">Links ページ</a>
-          からどうぞ。
-        </p>
-      </div>
-    </div>
-  </section>
+    <p class="about__links">
+      <a href={site.social.x} target="_blank" rel="noopener noreferrer">X</a>
+      ·
+      <a href={site.social.youtube} target="_blank" rel="noopener noreferrer">tato youtube</a>
+      ·
+      <a href={site.social.nocffieYoutube} target="_blank" rel="noopener noreferrer">nocffie youtube</a>
+    </p>
+  </div>
 </BaseLayout>
 
 <style>
-  .about {
-    padding: 2rem;
-    background: linear-gradient(180deg, var(--pop-white), var(--pop-bg-alt));
+  .section {
+    margin-top: 3rem;
   }
 
-  .about__profile {
-    display: grid;
-    gap: 1.5rem;
-    align-items: center;
-    margin-bottom: 2rem;
-  }
-
-  @media (min-width: 640px) {
-    .about__profile {
-      grid-template-columns: auto 1fr;
-    }
-  }
-
-  .about__avatar {
-    width: 180px;
-    aspect-ratio: 1;
-    border: 4px solid var(--pop-border);
-    border-radius: 50%;
-    background: var(--pop-yellow);
-    box-shadow: var(--shadow-pop);
-    object-fit: cover;
-  }
-
-  .about__name {
-    margin: 0 0 0.5rem;
-    font-size: 2rem;
-    font-weight: 800;
-  }
-
-  .about__bio {
+  .about p {
     margin: 0;
-    color: var(--pop-muted);
-    font-size: 1.05rem;
+    font-size: 0.95rem;
   }
 
-  .about__details {
-    display: grid;
-    gap: 1rem;
+  .about p + p {
+    margin-top: 1.5rem;
   }
 
-  @media (min-width: 768px) {
-    .about__details {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+  .about__links {
+    margin-top: 2.5rem !important;
+    color: var(--color-muted);
+    font-size: 0.85rem !important;
+    letter-spacing: 0.06em;
   }
 
-  .about__block {
-    padding: 1rem;
-    border: 2px dashed rgb(45 27 78 / 18%);
-    border-radius: 1rem;
-    background: rgb(255 255 255 / 70%);
-  }
-
-  .about__block h3 {
-    margin: 0 0 0.5rem;
-    font-size: 1rem;
-  }
-
-  .about__block p {
-    margin: 0;
-    color: var(--pop-muted);
-  }
-
-  .about__block a {
-    color: var(--pop-purple);
-    font-weight: 700;
+  .about__links a {
+    text-decoration: none;
   }
 </style>

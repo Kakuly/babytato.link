@@ -1,16 +1,18 @@
 export const site = {
-  name: 'BabyTato',
-  tagline: '歌ってみた · オリジナル · 配信',
-  description: 'BabyTato の公式サイト。お知らせ、リンク、作品集を掲載しています。',
-  heroEmoji: '🎤',
+  name: 'tato',
+  tagline: 'vocal · original · nocffie',
+  description: 'tato の公式サイト。歌、オリジナル曲、nocffie の活動について。',
   profile: {
-    name: 'BabyTato',
-    bio: 'ポップで元気な歌声が得意な歌い手。カバー曲からオリジナルまで、いろんな音で届けます。',
-    avatar: '/avatar-placeholder.svg',
+    name: 'tato',
+    paragraphs: [
+      '「やりたいことを、やりたいだけやる」をモットーに活動している歌い手。',
+      'ジャンルに縛られない多彩な歌声を武器に、自分にしか出せない表現を日々探している。',
+      '中身はあかちゃんなので優しくしてください。',
+    ],
   },
   social: {
-    x: 'https://x.com/example',
-    youtube: 'https://youtube.com/@example',
-    niconico: 'https://www.nicovideo.jp/user/example',
+    x: 'https://x.com/TaTo_6a6y',
+    youtube: 'https://www.youtube.com/@tat040',
+    nocffieYoutube: 'https://www.youtube.com/@nocffie',
   },
 } as const;
