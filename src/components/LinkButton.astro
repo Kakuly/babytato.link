@@ -1,0 +1,68 @@
+---
+interface Props {
+  label: string;
+  url: string;
+  description?: string;
+  emoji?: string;
+}
+
+const { label, url, description, emoji = '🔗' } = Astro.props;
+---
+
+<a class="link-button bubble-card" href={url} target="_blank" rel="noopener noreferrer">
+  <span class="link-button__emoji" aria-hidden="true">{emoji}</span>
+  <span class="link-button__content">
+    <span class="link-button__label">{label}</span>
+    {description && <span class="link-button__desc">{description}</span>}
+  </span>
+  <span class="link-button__arrow" aria-hidden="true">↗</span>
+</a>
+
+<style>
+  .link-button {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+    background: var(--pop-white);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .link-button:hover {
+    background: var(--pop-bg-alt);
+  }
+
+  .link-button__emoji {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border: 2px solid var(--pop-border);
+    border-radius: 50%;
+    background: var(--pop-blue);
+    font-size: 1.25rem;
+  }
+
+  .link-button__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .link-button__label {
+    font-weight: 800;
+  }
+
+  .link-button__desc {
+    color: var(--pop-muted);
+    font-size: 0.9rem;
+  }
+
+  .link-button__arrow {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--pop-purple);
+  }
+</style>

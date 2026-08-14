@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const newsEntries = await getCollection('news');
+  return newsEntries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const { title, date, summary, emoji } = entry.data;
+
+const formattedDate = date.toLocaleDateString('ja-JP', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout title={title} description={summary ?? title}>
+  <article class="article bubble-card">
+    <header class="article__header">
+      <a class="article__back" href="/news/">← お知らせ一覧</a>
+      <span class="tag tag--pink">{emoji} News</span>
+      <h1 class="article__title">{title}</h1>
+      <time class="article__date" datetime={date.toISOString()}>{formattedDate}</time>
+      {summary && <p class="article__summary">{summary}</p>}
+    </header>
+    <div class="article__body prose">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .article {
+    padding: 2rem;
+    background: var(--pop-white);
+  }
+
+  .article__back {
+    display: inline-block;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: var(--pop-purple);
+    text-decoration: none;
+  }
+
+  .article__title {
+    margin: 0.75rem 0;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .article__date {
+    display: block;
+    color: var(--pop-muted);
+    font-size: 0.95rem;
+  }
+
+  .article__summary {
+    margin: 1rem 0 0;
+    color: var(--pop-muted);
+    font-size: 1.05rem;
+  }
+
+  .article__body {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 3px dashed rgb(45 27 78 / 20%);
+  }
+</style>

@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WorkCard from '../components/WorkCard.astro';
+import { getCollection } from 'astro:content';
+
+const works = (await getCollection('works')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+---
+
+<BaseLayout title="Works" description="BabyTato の作品集。カバー、オリジナル、ライブなど。">
+  <header class="page-header">
+    <h1 class="page-title">🎵 Works</h1>
+    <p class="page-lead">歌ってみた、オリジナル、ライブのアーカイブをまとめています。</p>
+  </header>
+
+  {
+    works.length > 0 ? (
+      <div class="grid-2">
+        {works.map((entry) => (
+          <WorkCard entry={entry} />
+        ))}
+      </div>
+    ) : (
+      <p class="empty-state bubble-card">まだ作品はありません。</p>
+    )
+  }
+</BaseLayout>

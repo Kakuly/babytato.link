@@ -1,0 +1,40 @@
+---
+import { site } from '../data/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="footer__inner bubble-card">
+    <p class="footer__brand">
+      <span aria-hidden="true">{site.heroEmoji}</span>
+      {site.name}
+    </p>
+    <p class="footer__copy">&copy; {year} {site.name}. All rights reserved.</p>
+    <p class="footer__note">Built with Astro · babytato.link</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    width: min(calc(100% - 2rem), var(--max-width));
+    margin: 0 auto 2rem;
+  }
+
+  .footer__inner {
+    padding: 1.5rem;
+    text-align: center;
+    background: linear-gradient(135deg, var(--pop-yellow), var(--pop-pink));
+  }
+
+  .footer__brand {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+
+  .footer__copy,
+  .footer__note {
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+  }
+</style>

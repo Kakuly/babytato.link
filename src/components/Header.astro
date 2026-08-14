@@ -1,0 +1,124 @@
+---
+import { site } from '../data/site';
+
+const navItems = [
+  { href: '/', label: 'Home', emoji: '🏠' },
+  { href: '/news/', label: 'News', emoji: '📢' },
+  { href: '/works/', label: 'Works', emoji: '🎵' },
+  { href: '/links/', label: 'Links', emoji: '🔗' },
+  { href: '/about/', label: 'About', emoji: '✨' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="header">
+  <div class="header__inner">
+    <a class="logo" href="/">
+      <span class="logo__emoji" aria-hidden="true">{site.heroEmoji}</span>
+      <span class="logo__text">{site.name}</span>
+    </a>
+
+    <nav class="nav" aria-label="メインナビゲーション">
+      {
+        navItems.map((item) => {
+          const isActive =
+            item.href === '/'
+              ? currentPath === '/'
+              : currentPath.startsWith(item.href);
+          return (
+            <a class:list={['nav__link', { 'nav__link--active': isActive }]} href={item.href}>
+              <span aria-hidden="true">{item.emoji}</span>
+              {item.label}
+            </a>
+          );
+        })
+      }
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 3px solid var(--pop-border);
+    background: rgb(255 255 255 / 92%);
+    backdrop-filter: blur(8px);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: min(calc(100% - 2rem), var(--max-width));
+    margin: 0 auto;
+    padding: 1rem 0;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+
+  .logo__emoji {
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 3px solid var(--pop-border);
+    border-radius: 50%;
+    background: var(--pop-yellow);
+    box-shadow: var(--shadow-pop);
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .nav__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.85rem;
+    border: 2px solid var(--pop-border);
+    border-radius: var(--radius-pill);
+    background: var(--pop-white);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .nav__link:hover,
+  .nav__link--active {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-pop);
+    background: var(--pop-blue);
+  }
+
+  @media (max-width: 720px) {
+    .header__inner {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .nav {
+      justify-content: center;
+    }
+
+    .nav__link span:last-child,
+    .nav__link {
+      font-size: 0.82rem;
+    }
+  }
+</style>
