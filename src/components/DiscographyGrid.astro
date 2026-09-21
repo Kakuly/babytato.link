@@ -1,0 +1,98 @@
+---
+import type { DiscographyEntry } from '../lib/discography';
+
+interface Props {
+  entries: DiscographyEntry[];
+  emptyMessage?: string;
+}
+
+const { entries, emptyMessage = 'リリースはまだありません。' } = Astro.props;
+---
+
+{
+  entries.length > 0 ? (
+    <div class="discography-grid">
+      {entries.map((entry) => {
+        const Tag = entry.url ? 'a' : 'div';
+        const linkProps = entry.url
+          ? {
+              href: entry.url,
+              target: '_blank',
+              rel: 'noopener noreferrer',
+            }
+          : {};
+
+        return (
+          <Tag class="discography-grid__item" {...linkProps} title={entry.title}>
+            <img
+              class="discography-grid__img"
+              src={entry.img}
+              alt={entry.title}
+              width="480"
+              height="480"
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="discography-grid__meta">
+              <span class="discography-grid__title">{entry.title}</span>
+              {entry.date ? <span class="discography-grid__date">{entry.date}</span> : null}
+            </span>
+          </Tag>
+        );
+      })}
+    </div>
+  ) : (
+    <p class="discography-empty">{emptyMessage}</p>
+  )
+}
+
+<style>
+  .discography-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: 1rem;
+  }
+
+  .discography-grid__item {
+    display: grid;
+    gap: 0.5rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .discography-grid__item:hover {
+    text-decoration: none;
+  }
+
+  .discography-grid__img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border: 2px solid var(--line);
+    background: var(--void);
+  }
+
+  .discography-grid__meta {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .discography-grid__title {
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .discography-grid__date {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .discography-empty {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+</style>

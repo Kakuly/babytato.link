@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsItem from '../components/NewsItem.astro';
 import { getCollection } from 'astro:content';
+import Barcode from '../components/Barcode.astro';
 import SocialLinkGrid from '../components/SocialLinkGrid.astro';
 import VideoCarousel from '../components/VideoCarousel.astro';
 import { site } from '../data/site';
@@ -88,36 +89,7 @@ const motto = 'やりたいことを、やりたいだけやる';
       </div>
       <div class="base__links">
         <SocialLinkGrid />
-        <svg class="base__bar" viewBox="0 0 220 48" aria-hidden="true">
-          <rect x="0" y="4" width="4" height="40" />
-          <rect x="8" y="4" width="2" height="40" />
-          <rect x="14" y="4" width="6" height="40" />
-          <rect x="24" y="4" width="2" height="40" />
-          <rect x="30" y="4" width="4" height="40" />
-          <rect x="38" y="4" width="2" height="40" />
-          <rect x="44" y="4" width="8" height="40" />
-          <rect x="56" y="4" width="2" height="40" />
-          <rect x="62" y="4" width="3" height="40" />
-          <rect x="70" y="4" width="2" height="40" />
-          <rect x="76" y="4" width="6" height="40" />
-          <rect x="86" y="4" width="2" height="40" />
-          <rect x="92" y="4" width="4" height="40" />
-          <rect x="100" y="4" width="2" height="40" />
-          <rect x="106" y="4" width="8" height="40" />
-          <rect x="118" y="4" width="2" height="40" />
-          <rect x="124" y="4" width="3" height="40" />
-          <rect x="132" y="4" width="2" height="40" />
-          <rect x="138" y="4" width="5" height="40" />
-          <rect x="148" y="4" width="2" height="40" />
-          <rect x="154" y="4" width="7" height="40" />
-          <rect x="165" y="4" width="2" height="40" />
-          <rect x="171" y="4" width="4" height="40" />
-          <rect x="179" y="4" width="2" height="40" />
-          <rect x="185" y="4" width="6" height="40" />
-          <rect x="195" y="4" width="2" height="40" />
-          <rect x="201" y="4" width="3" height="40" />
-          <rect x="208" y="4" width="12" height="40" />
-        </svg>
+        <Barcode value="tato official" class="base__bar" />
       </div>
     </section>
 
@@ -158,8 +130,9 @@ const motto = 'やりたいことを、やりたいだけやる';
     font-family: var(--font-display);
     font-size: clamp(5.2rem, 22vw, 12rem);
     font-weight: 800;
-    letter-spacing: -0.04em;
+    font-style: normal;
     line-height: 0.78;
+    letter-spacing: -0.04em;
     text-align: center;
     text-transform: lowercase;
     color: transparent;
@@ -185,6 +158,7 @@ const motto = 'やりたいことを、やりたいだけやる';
    */
   .holo {
     --holo-h: min(62vh, 34rem);
+    --holo-content-h: calc(var(--holo-h) - 4px);
     --holo-open-duration: 0.78s;
     --holo-close-duration: 0.88s;
     --mask-fade-close-duration: 1.05s;
@@ -209,10 +183,11 @@ const motto = 'やりたいことを、やりたいだけやる';
   }
 
   .holo.is-open {
+    --holo-open-extra: 18rem;
     --mask-fade: 28%;
     --illust-anchor: 0;
     --profile-reveal: 130%;
-    min-height: calc(var(--holo-h) + 18rem);
+    min-height: calc(var(--holo-h) + var(--holo-open-extra));
     transition:
       min-height var(--holo-open-duration) var(--holo-open-ease),
       --mask-fade var(--holo-open-duration) var(--holo-open-ease),
@@ -232,6 +207,7 @@ const motto = 'やりたいことを、やりたいだけやる';
     position: absolute;
     inset: 0;
     isolation: isolate;
+    container-type: inline-size;
   }
 
   .holo__field {
@@ -244,17 +220,21 @@ const motto = 'やりたいことを、やりたいだけやる';
   }
 
   .holo__illust {
+    --illust-fit-h: min(var(--holo-content-h), calc(100cqw * 9 / 16));
     position: absolute;
     z-index: 1;
     left: 50%;
     top: 0;
     transform: translateX(-50%)
-      translateY(calc(var(--illust-anchor) * (var(--holo-h) - 100%)));
+      translateY(
+        calc(
+          var(--illust-anchor) * max(0px, var(--holo-content-h) - var(--illust-fit-h))
+        )
+      );
     display: block;
-    max-height: var(--holo-h);
-    max-width: 100%;
-    width: auto;
-    height: auto;
+    width: min(100cqw, calc(var(--holo-content-h) * 16 / 9));
+    height: var(--illust-fit-h);
+    aspect-ratio: 16 / 9;
     object-fit: contain;
     object-position: center top;
     mix-blend-mode: lighten;
@@ -266,19 +246,24 @@ const motto = 'やりたいことを、やりたいだけやる';
     mask-repeat: no-repeat;
   }
 
-  /* Resize-only smoothing — keep open/close on --illust-anchor (see HOLO-COMPOSITING.md) */
-  .holo.is-resizing .holo__illust {
-    transition:
-      max-height var(--holo-close-duration) var(--holo-close-ease),
-      max-width var(--holo-close-duration) var(--holo-close-ease),
-      transform var(--holo-close-duration) var(--holo-close-ease);
+  /*
+   * Resize: no CSS transitions (JS sets --*-live each frame from animated min-height).
+   * Closed: top-pin via --illust-anchor 0; on release anchor eases back to bottom.
+   */
+  .holo.is-resizing {
+    transition: none;
   }
 
-  .holo.is-open.is-resizing .holo__illust {
-    transition:
-      max-height var(--holo-open-duration) var(--holo-open-ease),
-      max-width var(--holo-open-duration) var(--holo-open-ease),
-      transform var(--holo-open-duration) var(--holo-open-ease);
+  .holo.is-resizing:not(.is-open) {
+    --illust-anchor: 0;
+  }
+
+  .holo.is-resizing .holo__illust {
+    --holo-content-h: var(--holo-content-h-live, calc(var(--holo-h) - 4px));
+    --illust-fit-h: var(--illust-fit-h-live, min(var(--holo-content-h), calc(100cqw * 9 / 16)));
+    width: var(--illust-fit-w-live, min(100cqw, calc(var(--holo-content-h) * 16 / 9)));
+    height: var(--illust-fit-h-live, var(--illust-fit-h));
+    transition: none;
   }
 
   .holo__kicker,
@@ -510,11 +495,11 @@ const motto = 'やりたいことを、やりたいだけやる';
     padding-bottom: 0.35rem;
   }
 
-  .base__bar {
+  .base__links :global(.base__bar) {
     width: 100%;
     height: 3.2rem;
     padding: 0.55rem 0.8rem 0.4rem;
-    fill: var(--ink);
+    color: var(--ink);
   }
 
   @media (max-width: 720px) {
@@ -606,8 +591,10 @@ const motto = 'やりたいことを、やりたいだけやる';
     if (!holo || !btn) return;
 
     var label = btn.querySelector('.visually-hidden');
+    var illust = holo.querySelector('.holo__illust');
     var COOLDOWN_MS = 750;
     var resizeTimer;
+    var resizeRaf = 0;
 
     function holoResizeSmoothMs() {
       var styles = getComputedStyle(holo);
@@ -618,13 +605,58 @@ const motto = 'やりたいことを、やりたいだけやる';
       return (Number.isFinite(seconds) ? seconds : 0.88) * 1000;
     }
 
-    window.addEventListener('resize', function () {
+    function parseLengthPx(value, rootPx) {
+      var n = parseFloat(value);
+      if (!Number.isFinite(n)) return 0;
+      if (String(value).indexOf('rem') !== -1) return n * rootPx;
+      return n;
+    }
+
+    function syncIllustSizing() {
+      if (!holo.classList.contains('is-resizing') || !illust) return;
+      var holoStyles = getComputedStyle(holo);
+      var rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      var framePx = parseLengthPx(holoStyles.minHeight, rootPx);
+      if (holo.classList.contains('is-open')) {
+        var extra = holoStyles.getPropertyValue('--holo-open-extra').trim() || '18rem';
+        framePx -= parseLengthPx(extra, rootPx);
+      }
+      if (framePx > 0) {
+        var composite = holo.querySelector('.holo__composite');
+        var frameW = composite ? composite.clientWidth : holo.clientWidth;
+        var contentPx = Math.max(0, framePx - 4);
+        var fitH = Math.min(contentPx, frameW * 9 / 16);
+        var fitW = Math.min(frameW, contentPx * 16 / 9);
+        holo.style.setProperty('--holo-content-h-live', contentPx + 'px');
+        holo.style.setProperty('--illust-fit-h-live', fitH + 'px');
+        holo.style.setProperty('--illust-fit-w-live', fitW + 'px');
+      }
+      resizeRaf = requestAnimationFrame(syncIllustSizing);
+    }
+
+    function clearLiveSizing() {
+      holo.style.removeProperty('--holo-content-h-live');
+      holo.style.removeProperty('--illust-fit-h-live');
+      holo.style.removeProperty('--illust-fit-w-live');
+    }
+
+    function stopResizeSync() {
+      holo.classList.remove('is-resizing');
+      if (resizeRaf) {
+        cancelAnimationFrame(resizeRaf);
+        resizeRaf = 0;
+      }
+      requestAnimationFrame(clearLiveSizing);
+    }
+
+    function beginResizeSync() {
       holo.classList.add('is-resizing');
+      if (!resizeRaf) resizeRaf = requestAnimationFrame(syncIllustSizing);
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function () {
-        holo.classList.remove('is-resizing');
-      }, holoResizeSmoothMs());
-    });
+      resizeTimer = setTimeout(stopResizeSync, holoResizeSmoothMs());
+    }
+
+    window.addEventListener('resize', beginResizeSync);
 
     btn.addEventListener('click', function () {
       if (btn.disabled) return;

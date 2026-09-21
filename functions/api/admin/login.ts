@@ -43,13 +43,13 @@ export async function onRequestPost(context: LoginContext): Promise<Response> {
   }
 
   const token = await createSessionToken(username, secret);
-  const hostname = new URL(request.url).hostname;
+  const url = new URL(request.url);
 
   return Response.json(
     { ok: true, username },
     {
       headers: {
-        "Set-Cookie": sessionCookieHeader(token, hostname),
+        "Set-Cookie": sessionCookieHeader(token, url.hostname, url.protocol),
       },
     },
   );

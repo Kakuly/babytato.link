@@ -88,18 +88,40 @@ export function readSessionCookie(request: Request): string | null {
   return null;
 }
 
+function isLocalDevHost(hostname: string): boolean {
+  return hostname === "127.0.0.1" || hostname === "localhost" || hostname === "::1";
+}
+
+/** Omit Secure on http:// localhost so pages:dev and SITE iframe login work. */
+function cookieSecurePart(hostname?: string, protocol?: string): string {
+  if (protocol === "http:") return "";
+  if (hostname && isLocalDevHost(hostname)) return "";
+  return "; Secure";
+}
+
+/**
+ * Lax blocks Set-Cookie in cross-site iframes (e.g. SITE at localhost:4001 embedding
+ * 127.0.0.1:8788). Chrome allows SameSite=None without Secure on localhost / 127.0.0.1.
+ */
+function cookieSameSitePart(hostname?: string, protocol?: string): string {
+  if (protocol === "http:" && hostname && isLocalDevHost(hostname)) {
+    return "SameSite=None";
+  }
+  return "SameSite=Lax";
+}
+
 function cookieDomainPart(hostname?: string): string {
   if (!hostname) return "";
   const domain = cookieDomain(hostname);
   return domain ? `; Domain=${domain}` : "";
 }
 
-export function sessionCookieHeader(token: string, hostname?: string): string {
-  return `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_MAX_AGE}${cookieDomainPart(hostname)}`;
+export function sessionCookieHeader(token: string, hostname?: string, protocol?: string): string {
+  return `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; HttpOnly; ${cookieSameSitePart(hostname, protocol)}; Max-Age=${SESSION_MAX_AGE}${cookieSecurePart(hostname, protocol)}${cookieDomainPart(hostname)}`;
 }
 
-export function clearSessionCookieHeader(hostname?: string): string {
-  return `${COOKIE_NAME}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0${cookieDomainPart(hostname)}`;
+export function clearSessionCookieHeader(hostname?: string, protocol?: string): string {
+  return `${COOKIE_NAME}=; Path=/; HttpOnly; ${cookieSameSitePart(hostname, protocol)}; Max-Age=0${cookieSecurePart(hostname, protocol)}${cookieDomainPart(hostname)}`;
 }
 
 export { COOKIE_NAME, SESSION_MAX_AGE };

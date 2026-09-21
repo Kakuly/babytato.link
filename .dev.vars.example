@@ -7,3 +7,5 @@ SESSION_SECRET=local-dev-secret-change-me-32chars-min
 GITHUB_TOKEN=ghp_your_token_here
 GITHUB_REPO=kakuly/babytato.link
 GITHUB_BRANCH=main
+# SITE ハブ iframe 用: pages:dev で /admin/login/ へ自動ログイン（127.0.0.1 / localhost のみ）
+DEV_AUTO_LOGIN_USER=kakuly

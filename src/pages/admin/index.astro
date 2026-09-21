@@ -1,5 +1,6 @@
 ---
 import AdminLayout from "../../layouts/AdminLayout.astro";
+import { adminLinksPath } from "../../lib/admin-paths";
 ---
 
 <AdminLayout>
@@ -26,10 +27,10 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
         </span>
       </li>
       <li>
-        <span class="admin-nav-tile" aria-disabled="true">
+        <a class="admin-nav-tile" href={adminLinksPath()}>
           <span class="admin-nav-tile__label">links</span>
-          <span class="admin-nav-tile__hint">coming soon</span>
-        </span>
+          <span class="admin-nav-tile__hint">SNS URLs</span>
+        </a>
       </li>
     </ul>
   </section>
@@ -41,7 +42,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
 
   <section class="admin-card">
     <p class="admin-coming-soon">
-      コンテンツ編集 API は今後追加予定です。現時点ではログイン・セッション管理のみ利用できます。
+      news · site info · discography の編集 UI は Phase 2 以降で追加予定です。
     </p>
   </section>
 </AdminLayout>

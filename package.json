@@ -7,7 +7,7 @@
     "dev": "astro dev --host --port 4322 --strictPort",
     "build": "astro build",
     "preview": "astro preview",
-    "pages:dev": "wrangler pages dev dist --port 8788 --ip 127.0.0.1 --strictPort",
+    "pages:dev": "PATH=\"/Users/kakuly/.local/node-v22.19.0-darwin-arm64/bin:$PATH\" wrangler pages dev dist --port 8788 --ip 127.0.0.1",
     "pages:deploy": "rm -rf node_modules/.cache/wrangler 2>/dev/null; wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true",
     "check": "astro check"
   },
@@ -15,6 +15,8 @@
     "astro": "^5.12.0"
   },
   "devDependencies": {
+    "@xmldom/xmldom": "^0.9.12",
+    "jsbarcode": "^3.12.3",
     "typescript": "^5.9.0",
     "wrangler": "^4.40.0"
   },

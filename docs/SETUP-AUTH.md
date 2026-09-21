@@ -282,6 +282,22 @@ bun run pages:dev
 1. 表示された URL（例: `http://127.0.0.1:8788/admin/login/`）を開く
 2. `.dev.vars` のユーザー名/パスワードでログイン
 
+**SITE ハブ iframe（自動ログイン）**
+
+Kakuly 用 SITE ハブから admin iframe を開くとき、毎回手入力を避ける場合:
+
+1. `.dev.vars` に `DEV_AUTO_LOGIN_USER=kakuly` を追加（`.dev.vars.example` 参照）
+2. `bun run pages:dev` を起動
+3. SITE → **tato** 管理画面 iframe が `http://127.0.0.1:8788/admin/login/` を読み込むと、**127.0.0.1 / localhost のみ** Kakuly として自動ログイン → ダッシュボードへ
+
+> 本番（`manage.babytato.link`）では無効。`DEV_AUTO_LOGIN_USER` 未設定でも無効。
+
+**iframe でログイン画面のままになる場合**
+
+- SITE を `http://127.0.0.1:4001` で開く（`localhost:4001` だと iframe の `127.0.0.1:8788` と cross-site になり Cookie が弾かれることがある）
+- `curl -sI http://127.0.0.1:8788/admin/login/` で `Set-Cookie` に `SameSite=None`（Secure なし）が付いているか確認
+- `bun run build && bun run pages:dev` で Functions を再ビルド・再起動
+
 **manage ホストのローカル検証（任意）:**
 
 ```bash

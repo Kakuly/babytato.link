@@ -1,4 +1,4 @@
-import { site } from './site';
+import socialLinksData from './social-links.json';
 
 export type SocialPlatform =
   | 'x'
@@ -14,12 +14,20 @@ export type SocialLink = {
   url: string;
 };
 
+const LABELS: Record<SocialPlatform, string> = {
+  x: 'X',
+  youtube: 'YOUTUBE',
+  niconico: 'NICONICO',
+  soundcloud: 'SOUNDCLOUD',
+  spotify: 'SPOTIFY',
+  appleMusic: 'APPLE MUSIC',
+};
+
 /** 2×3 SNS grid — row-major: X / YOUTUBE, NICONICO / SOUNDCLOUD, SPOTIFY / APPLE MUSIC */
-export const socialLinks: SocialLink[] = [
-  { id: 'x', label: 'X', url: site.social.x },
-  { id: 'youtube', label: 'YOUTUBE', url: site.social.youtube },
-  { id: 'niconico', label: 'NICONICO', url: site.social.niconico },
-  { id: 'soundcloud', label: 'SOUNDCLOUD', url: site.social.soundcloud },
-  { id: 'spotify', label: 'SPOTIFY', url: site.social.spotify },
-  { id: 'appleMusic', label: 'APPLE MUSIC', url: site.social.appleMusic },
-];
+export const socialLinks: SocialLink[] = (
+  Object.entries(socialLinksData) as [SocialPlatform, string][]
+).map(([id, url]) => ({
+  id,
+  label: LABELS[id],
+  url,
+}));

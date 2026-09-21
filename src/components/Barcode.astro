@@ -1,0 +1,32 @@
+---
+import { getCode128Barcode } from '../lib/barcode';
+
+interface Props {
+  value: string;
+  label?: string;
+  class?: string;
+}
+
+const { value, label = value, class: className } = Astro.props;
+const barcode = getCode128Barcode(value);
+---
+
+<svg
+  class:list={['barcode', className]}
+  viewBox={barcode.viewBox}
+  role="img"
+  aria-label={label}
+>
+  <title>{label}</title>
+  {
+    barcode.rects.map((rect) => (
+      <rect x={rect.x} y={rect.y} width={rect.width} height={rect.height} />
+    ))
+  }
+</svg>
+
+<style>
+  .barcode {
+    fill: currentColor;
+  }
+</style>

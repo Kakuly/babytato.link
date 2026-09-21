@@ -127,21 +127,22 @@ bun run build && bun run pages:dev
 
 ### Phase B — コンテンツ編集 API
 
-- [ ] GitHub Contents API でファイル read/write（`GITHUB_TOKEN` 使用）
+- [x] GitHub Contents API でファイル read/write（`GITHUB_TOKEN` 使用）
+- [x] SNS リンク: `src/data/social-links.json` · `/api/admin/content/links`
 - [ ] 編集対象の整理:
   - [ ] `src/data/site.ts`（サイト情報）
-  - [ ] `src/data/links.ts`（リンク）
+  - [ ] `src/data/discography.json`（ディスコグラフィー）→ [`DISCOGRAPHY-TODO.md`](./DISCOGRAPHY-TODO.md)
   - [ ] `src/content/news/*.md`（ニュース）
-- [ ] API ルート例: `/api/admin/content/*`（セッション必須）
-- [ ] バリデーション · 競合検知（SHA） · commit メッセージ
+- [ ] バリデーション · 競合検知（SHA） · commit メッセージ（links で部分実装済）
 
 ### Phase C — 管理 UI
 
-- [ ] ダッシュボードの「coming soon」タイルを実装に差し替え
+- [x] links 編集（`/admin/links/` · manage ホストでは `/links/`）
+- [ ] ダッシュボードの残りタイル
   - [ ] site info 編集フォーム
-  - [ ] news 一覧 · 新規 · 編集
-  - [ ] links 編集
-- [ ] 保存 → API → GitHub commit → Pages 再ビルドのフィードバック表示
+  - [ ] news 一覧 · 新規 · 編集（WYSIWYG）
+  - [ ] discography 編集
+- [x] 保存 → API → GitHub commit → Pages 再ビルドのフィードバック表示（links）
 
 ### Phase D — 運用・セキュリティ（任意）
 

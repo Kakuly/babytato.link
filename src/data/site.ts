@@ -11,12 +11,6 @@ export const site = {
     ],
   },
   social: {
-    x: 'https://x.com/TaTo_6a6y',
-    youtube: 'https://www.youtube.com/@tat040',
     nocffieYoutube: 'https://www.youtube.com/@nocffie',
-    niconico: '#',
-    soundcloud: '#',
-    spotify: '#',
-    appleMusic: '#',
   },
 } as const;

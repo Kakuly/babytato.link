@@ -1,6 +1,16 @@
 import type { PagesEnv } from "./lib/env";
-import { isManageHost, isManagePassthroughPath, MANAGE_HOST } from "./lib/manage-host";
-import { readSessionCookie, verifySessionToken } from "./lib/session";
+import {
+  isManageHost,
+  isManagePassthroughPath,
+  manageAdminInternalPath,
+  MANAGE_HOST,
+} from "./lib/manage-host";
+import {
+  createSessionToken,
+  readSessionCookie,
+  sessionCookieHeader,
+  verifySessionToken,
+} from "./lib/session";
 
 interface MiddlewareContext {
   request: Request;
@@ -16,6 +26,45 @@ async function hasValidSession(request: Request, secret: string | undefined): Pr
   return session !== null;
 }
 
+function isLocalDevHost(hostname: string): boolean {
+  return hostname === "127.0.0.1" || hostname === "localhost";
+}
+
+function isDevAutoLoginEntryPath(pathname: string, manageHost: boolean): boolean {
+  if (pathname === "/admin/login/" || pathname === "/admin/login") return true;
+  if (pathname === "/admin/" || pathname === "/admin") return true;
+  if (manageHost && (pathname === "/" || pathname === "")) return true;
+  return false;
+}
+
+function devDashboardPath(manageHost: boolean): string {
+  return manageHost ? "/" : "/admin/";
+}
+
+async function devAutoLoginRedirect(
+  request: Request,
+  env: PagesEnv,
+  redirectPath: string,
+): Promise<Response | null> {
+  const username = env.DEV_AUTO_LOGIN_USER?.trim();
+  if (!username) return null;
+
+  const secret = env.SESSION_SECRET?.trim();
+  if (!secret) return null;
+
+  const url = new URL(request.url);
+  const token = await createSessionToken(username, secret);
+  const redirectUrl = new URL(redirectPath, url.origin).toString();
+
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: redirectUrl,
+      "Set-Cookie": sessionCookieHeader(token, url.hostname, url.protocol),
+    },
+  });
+}
+
 function rewriteRequest(request: Request, pathname: string): Request {
   const url = new URL(request.url);
   url.pathname = pathname;
@@ -26,12 +75,35 @@ export async function onRequest(context: MiddlewareContext): Promise<Response> {
   const { request, env, next } = context;
   const url = new URL(request.url);
   const hostname = url.hostname;
+  const pathname = url.pathname;
+  const manageHost = isManageHost(hostname);
 
-  if (!isManageHost(hostname)) {
-    return next();
+  if (
+    isLocalDevHost(hostname) &&
+    env.DEV_AUTO_LOGIN_USER?.trim() &&
+    isDevAutoLoginEntryPath(pathname, manageHost)
+  ) {
+    const secret = env.SESSION_SECRET?.trim();
+    const loggedIn = await hasValidSession(request, secret);
+    const dashboardPath = devDashboardPath(manageHost);
+
+    if (loggedIn) {
+      const onLoginPage =
+        pathname === "/admin/login/" ||
+        pathname === "/admin/login" ||
+        (manageHost && (pathname === "/" || pathname === ""));
+      if (onLoginPage) {
+        return Response.redirect(new URL(dashboardPath, url.origin).toString(), 302);
+      }
+    } else {
+      const autoLogin = await devAutoLoginRedirect(request, env, dashboardPath);
+      if (autoLogin) return autoLogin;
+    }
   }
 
-  const pathname = url.pathname;
+  if (!manageHost) {
+    return next();
+  }
 
   if (isManagePassthroughPath(pathname)) {
     return next();
@@ -48,6 +120,15 @@ export async function onRequest(context: MiddlewareContext): Promise<Response> {
 
   if (pathname.startsWith("/admin/")) {
     return Response.redirect(new URL("/", url.origin).toString(), 302);
+  }
+
+  const adminRoute = manageAdminInternalPath(pathname);
+  if (adminRoute) {
+    const loggedIn = await hasValidSession(request, env.SESSION_SECRET?.trim());
+    if (!loggedIn) {
+      return next({ request: rewriteRequest(request, "/admin/login/") });
+    }
+    return next({ request: rewriteRequest(request, adminRoute) });
   }
 
   if (pathname !== "/" && pathname !== "") {

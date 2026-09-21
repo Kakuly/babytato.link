@@ -1,30 +1,41 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import WorkItem from '../../components/WorkItem.astro';
-import { getYouTubeVideos } from '../../lib/youtube';
+import DiscographyGrid from '../../components/DiscographyGrid.astro';
+import { discography, sortByDateDesc } from '../../lib/discography';
 
-const videos = await getYouTubeVideos();
+const collabo = sortByDateDesc(discography.collabo);
+const myReleases = sortByDateDesc(discography.myReleases);
 ---
 
 <BaseLayout title="discography" description="tato のディスコグラフィー。">
   <h1 class="page-title">discography</h1>
-  <p class="page-lead">YouTube に公開された動画を自動で取得しています。</p>
+  <p class="page-lead">コラボレーションとソロリリースを掲載しています。</p>
 
-  {
-    videos.length > 0 ? (
-      <ul class="list-plain section">
-        {videos.map((video) => (
-          <WorkItem video={video} />
-        ))}
-      </ul>
-    ) : (
-      <p class="empty section">作品を取得できませんでした。</p>
-    )
-  }
+  <section class="discography-section">
+    <h2 class="discography-section__title">collabo</h2>
+    <DiscographyGrid entries={collabo} emptyMessage="コラボリリースはまだありません。" />
+  </section>
+
+  <section class="discography-section">
+    <h2 class="discography-section__title">my releases</h2>
+    <DiscographyGrid entries={myReleases} emptyMessage="ソロリリースはまだありません。" />
+  </section>
 </BaseLayout>
 
 <style>
-  .section {
-    margin-top: 1.75rem;
+  .discography-section {
+    margin-top: 2rem;
+  }
+
+  .discography-section + .discography-section {
+    margin-top: 2.5rem;
+  }
+
+  .discography-section__title {
+    margin: 0 0 1rem;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 </style>

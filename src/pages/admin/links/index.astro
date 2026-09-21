@@ -1,0 +1,176 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { adminDashboardPath } from "../../../lib/admin-paths";
+---
+
+<AdminLayout title="links">
+  <section class="admin-card">
+    <p class="admin-back">
+      <a href={adminDashboardPath()}>← dashboard</a>
+    </p>
+    <h2 class="admin-card-title">SNS links</h2>
+    <p class="admin-hint">公開サイトの SNS リンクを編集します。未設定の場合は <code>#</code> を入力してください。</p>
+
+    <form id="links-form" class="admin-grid">
+      <div class="admin-field">
+        <label for="link-x">X</label>
+        <input id="link-x" name="x" type="text" inputmode="url" autocomplete="off" spellcheck="false" required />
+      </div>
+      <div class="admin-field">
+        <label for="link-youtube">YouTube</label>
+        <input id="link-youtube" name="youtube" type="text" inputmode="url" autocomplete="off" spellcheck="false" required />
+      </div>
+      <div class="admin-field">
+        <label for="link-niconico">ニコニコ</label>
+        <input id="link-niconico" name="niconico" type="text" inputmode="url" autocomplete="off" spellcheck="false" required />
+      </div>
+      <div class="admin-field">
+        <label for="link-soundcloud">SoundCloud</label>
+        <input id="link-soundcloud" name="soundcloud" type="text" inputmode="url" autocomplete="off" spellcheck="false" required />
+      </div>
+      <div class="admin-field">
+        <label for="link-spotify">Spotify</label>
+        <input id="link-spotify" name="spotify" type="text" inputmode="url" autocomplete="off" spellcheck="false" required />
+      </div>
+      <div class="admin-field">
+        <label for="link-appleMusic">Apple Music</label>
+        <input id="link-appleMusic" name="appleMusic" type="text" inputmode="url" autocomplete="off" spellcheck="false" required />
+      </div>
+
+      <div class="admin-actions">
+        <button type="submit" class="admin-btn admin-btn-primary" id="links-save">save</button>
+        <button type="button" class="admin-btn" id="links-reload">reload</button>
+      </div>
+    </form>
+
+    <p id="links-status" class="admin-status" aria-live="polite"></p>
+  </section>
+</AdminLayout>
+
+<script>
+  import { requireSession, showStatus } from "../../../scripts/admin/client";
+
+  type SocialLinks = {
+    x: string;
+    youtube: string;
+    niconico: string;
+    soundcloud: string;
+    spotify: string;
+    appleMusic: string;
+  };
+
+  const form = document.getElementById("links-form") as HTMLFormElement | null;
+  const statusEl = document.getElementById("links-status");
+  const saveBtn = document.getElementById("links-save") as HTMLButtonElement | null;
+  const reloadBtn = document.getElementById("links-reload");
+  let fileSha = "";
+
+  function setLoading(loading: boolean) {
+    if (saveBtn) saveBtn.disabled = loading;
+    if (reloadBtn instanceof HTMLButtonElement) reloadBtn.disabled = loading;
+  }
+
+  function fillForm(links: SocialLinks) {
+    if (!form) return;
+    for (const [key, value] of Object.entries(links)) {
+      const input = form.elements.namedItem(key) as HTMLInputElement | null;
+      if (input) input.value = value;
+    }
+  }
+
+  async function loadLinks() {
+    setLoading(true);
+    showStatus(statusEl, "読み込み中…", "success");
+    statusEl?.classList.add("is-visible");
+
+    try {
+      const response = await fetch("/api/admin/content/links", { credentials: "same-origin" });
+      const data = (await response.json()) as {
+        ok: boolean;
+        links?: SocialLinks;
+        sha?: string;
+        message?: string;
+      };
+
+      if (!response.ok || !data.ok || !data.links) {
+        throw new Error(data.message ?? "読み込みに失敗しました。");
+      }
+
+      fileSha = data.sha ?? "";
+      fillForm(data.links);
+      showStatus(statusEl, "読み込み完了", "success");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "読み込みに失敗しました。";
+      showStatus(statusEl, message, "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function saveLinks(event: Event) {
+    event.preventDefault();
+    if (!form) return;
+
+    setLoading(true);
+    showStatus(statusEl, "保存中…", "success");
+    statusEl?.classList.add("is-visible");
+
+    const formData = new FormData(form);
+    const links = Object.fromEntries(formData.entries()) as SocialLinks;
+
+    try {
+      const response = await fetch("/api/admin/content/links", {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ links, sha: fileSha }),
+      });
+      const data = (await response.json()) as {
+        ok: boolean;
+        links?: SocialLinks;
+        sha?: string;
+        message?: string;
+      };
+
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message ?? "保存に失敗しました。");
+      }
+
+      if (data.links) fillForm(data.links);
+      fileSha = data.sha ?? fileSha;
+      showStatus(statusEl, data.message ?? "保存しました。", "success");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "保存に失敗しました。";
+      showStatus(statusEl, message, "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function init() {
+    try {
+      await requireSession();
+      await loadLinks();
+      form?.addEventListener("submit", saveLinks);
+      reloadBtn?.addEventListener("click", () => {
+        loadLinks().catch(() => undefined);
+      });
+    } catch {
+      // redirect handled in requireSession
+    }
+  }
+
+  init();
+</script>
+
+<style>
+  .admin-back {
+    margin: 0 0 var(--space-2);
+    font-size: 0.88rem;
+  }
+
+  .admin-hint code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+</style>

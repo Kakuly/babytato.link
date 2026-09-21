@@ -5,13 +5,13 @@ interface LogoutContext {
 }
 
 export async function onRequestPost(context: LogoutContext): Promise<Response> {
-  const hostname = new URL(context.request.url).hostname;
+  const url = new URL(context.request.url);
 
   return Response.json(
     { ok: true },
     {
       headers: {
-        "Set-Cookie": clearSessionCookieHeader(hostname),
+        "Set-Cookie": clearSessionCookieHeader(url.hostname, url.protocol),
       },
     },
   );

@@ -12,3 +12,7 @@ export function adminLoginPath(): string {
 export function adminDashboardPath(): string {
   return isManageHost() ? "/" : "/admin/";
 }
+
+export function adminLinksPath(): string {
+  return isManageHost() ? "/links/" : "/admin/links/";
+}
