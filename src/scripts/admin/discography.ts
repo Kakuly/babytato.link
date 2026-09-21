@@ -20,6 +20,7 @@ export type DiscographyData = {
 
 const ID_RE = /^[a-z0-9][a-z0-9-]*$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const MAX_JACKET_BYTES = 10 * 1024 * 1024;
 
 function slugifyId(title: string): string {
   const ascii = title
@@ -388,6 +389,11 @@ export async function initDiscographyEditor(): Promise<void> {
       return;
     }
 
+    if (pendingFile && pendingFile.size > MAX_JACKET_BYTES) {
+      showStatus(statusEl, "ジャケットは 10MB 以下にしてください。", "error");
+      return;
+    }
+
     setBusy(true);
     showStatus(statusEl, "保存中…", "success");
     statusEl?.classList.add("is-visible");
@@ -466,6 +472,15 @@ export async function initDiscographyEditor(): Promise<void> {
 
   fileInput?.addEventListener("change", () => {
     const file = fileInput.files?.[0] ?? null;
+    if (file && file.size > MAX_JACKET_BYTES) {
+      pendingFile = null;
+      if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+      pendingPreview = "";
+      fileInput.value = "";
+      showStatus(statusEl, "ジャケットは 10MB 以下にしてください。", "error");
+      updatePreview(findEntry(editingId ?? "")?.entry.img ?? "");
+      return;
+    }
     pendingFile = file;
     if (pendingPreview) URL.revokeObjectURL(pendingPreview);
     pendingPreview = file ? URL.createObjectURL(file) : "";

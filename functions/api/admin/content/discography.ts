@@ -106,7 +106,7 @@ export async function onRequestPost(context: ContentContext): Promise<Response> 
     return jsonError("画像ファイルを選択してください。");
   }
   if (file.size > MAX_JACKET_BYTES) {
-    return jsonError("ジャケットは 1.5MB 以下にしてください。");
+    return jsonError("ジャケットは 10MB 以下にしてください。");
   }
 
   const mime = file.type || "";

@@ -1,7 +1,8 @@
 export const DISCOGRAPHY_PATH = "src/data/discography.json";
 export const RELEASES_PUBLIC_DIR = "public/releases";
 export const RELEASES_URL_PREFIX = "/releases/";
-export const MAX_JACKET_BYTES = 1_500_000;
+/** 10MB binary (~13MB base64). GitHub Contents API allows 100MB files; CF Pages Functions request body is 100MB (Workers). */
+export const MAX_JACKET_BYTES = 10 * 1024 * 1024;
 
 export type ReleaseType = "single" | "ep" | "album";
 export type DiscographySection = "collabo" | "myReleases";

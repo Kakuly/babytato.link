@@ -43,6 +43,7 @@ import { adminDashboardPath } from "../../../lib/admin-paths";
           <div class="admin-field">
             <label for="disco-file">jacket</label>
             <input id="disco-file" name="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" />
+            <p class="admin-hint">JPEG / PNG / WebP / GIF · 10MB 以下</p>
           </div>
         </div>
 
@@ -111,5 +112,9 @@ import { adminDashboardPath } from "../../../lib/admin-paths";
   .admin-actions--inline {
     margin-top: 0;
     margin-bottom: var(--space-3);
+  }
+
+  .admin-disco-preview-row .admin-hint {
+    margin: 0;
   }
 </style>
