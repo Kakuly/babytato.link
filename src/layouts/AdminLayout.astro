@@ -1,0 +1,57 @@
+---
+interface Props {
+  title?: string;
+  showHeader?: boolean;
+}
+
+import "../styles/admin.css";
+
+const { title = "tato admin", showHeader = true } = Astro.props;
+const pageTitle = title === "tato admin" ? title : `${title} | tato admin`;
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{pageTitle}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    {
+      showHeader ? (
+        <div class="admin-shell">
+          <header class="admin-header">
+            <div class="admin-brand">
+              <div class="admin-logo" aria-hidden="true">
+                t
+              </div>
+              <div>
+                <h1 class="admin-title">tato admin</h1>
+                <p class="admin-subtitle">babytato.link editor</p>
+              </div>
+            </div>
+            <button type="button" class="admin-btn admin-btn-ghost" id="admin-logout">
+              logout
+            </button>
+          </header>
+          <slot />
+        </div>
+      ) : (
+        <slot />
+      )
+    }
+  </body>
+</html>
+
+<script>
+  import { adminLoginPath } from "../lib/admin-paths";
+
+  const logoutBtn = document.getElementById("admin-logout");
+  logoutBtn?.addEventListener("click", async () => {
+    await fetch("/api/admin/logout", { method: "POST", credentials: "same-origin" });
+    window.location.href = adminLoginPath();
+  });
+</script>

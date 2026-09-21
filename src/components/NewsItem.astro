@@ -16,26 +16,32 @@ const formattedDate = date.toLocaleDateString('ja-JP', {
 });
 ---
 
-<li>
+<article class="news-item">
   <p class="meta">{formattedDate}</p>
   <h3 class="title">{title}</h3>
   {summary && <p class="summary">{summary}</p>}
   <div class="prose">
     <Content />
   </div>
-</li>
+</article>
 
 <style>
+  .news-item + .news-item {
+    margin-top: 1.15rem;
+    padding-top: 1.15rem;
+    border-top: 1px solid rgba(17, 17, 17, 0.2);
+  }
+
   .title {
-    margin: 0.35rem 0 0;
+    margin: 0.25rem 0 0;
     font-size: 0.95rem;
-    font-weight: 400;
+    font-weight: 700;
     letter-spacing: 0.04em;
   }
 
   .summary {
-    margin: 0.5rem 0 0;
-    color: var(--color-muted);
-    font-size: 0.9rem;
+    margin: 0.4rem 0 0;
+    color: var(--muted);
+    font-size: 0.82rem;
   }
 </style>

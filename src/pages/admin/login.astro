@@ -1,0 +1,77 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="login" showHeader={false}>
+  <div class="admin-login-wrap">
+    <div class="admin-card admin-login-card">
+      <span class="admin-login-badge">tato admin</span>
+      <h1>login</h1>
+
+      <form id="login-form" class="admin-grid">
+        <div class="admin-field">
+          <label for="username">username</label>
+          <input id="username" name="username" autocomplete="username" required />
+        </div>
+        <div class="admin-field">
+          <label for="password">password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        <div class="admin-actions">
+          <button type="submit" class="admin-btn admin-btn-primary">enter</button>
+        </div>
+      </form>
+
+      <p id="login-status" class="admin-status" role="status"></p>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { adminDashboardPath } from "../../lib/admin-paths";
+  import { fetchSession, showStatus } from "../../scripts/admin/client";
+
+  const form = document.getElementById("login-form") as HTMLFormElement | null;
+  const status = document.getElementById("login-status");
+
+  async function init() {
+    const session = await fetchSession();
+    if (session.ok) {
+      window.location.href = adminDashboardPath();
+    }
+  }
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const data = new FormData(form);
+    const username = String(data.get("username") ?? "");
+    const password = String(data.get("password") ?? "");
+
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const result = (await response.json()) as { ok: boolean; message?: string };
+
+      if (!response.ok || !result.ok) {
+        showStatus(status, result.message ?? "ログインに失敗しました。", "error");
+        return;
+      }
+
+      window.location.href = adminDashboardPath();
+    } catch {
+      showStatus(status, "通信エラーが発生しました。", "error");
+    }
+  });
+
+  init();
+</script>

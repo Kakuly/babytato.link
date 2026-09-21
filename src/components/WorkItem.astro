@@ -21,22 +21,40 @@ const formattedDate = video.published.toLocaleDateString('ja-JP', {
     </a>
     <p class="meta">
       {formattedDate}
-      <span class="work__sep">·</span>
+      <span class="work__sep">/</span>
       {video.sourceLabel}
     </p>
   </div>
 </li>
 
 <style>
+  .work {
+    border: 2px solid var(--line);
+  }
+
+  .work + .work {
+    margin-top: -2px;
+  }
+
+  .work__main {
+    padding: 0.95rem 1rem;
+  }
+
+  .work:hover {
+    background: var(--ink);
+    color: var(--void);
+  }
+
   .work__title {
-    font-size: 0.95rem;
-    font-weight: 400;
-    letter-spacing: 0.04em;
+    font-size: 0.92rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
     text-decoration: none;
   }
 
-  .work__title:hover {
-    opacity: 0.6;
+  .work:hover .work__title,
+  .work:hover .meta {
+    color: var(--void);
   }
 
   .work__sep {
@@ -44,6 +62,6 @@ const formattedDate = video.published.toLocaleDateString('ja-JP', {
   }
 
   .meta {
-    margin: 0.35rem 0 0;
+    margin: 0.3rem 0 0;
   }
 </style>

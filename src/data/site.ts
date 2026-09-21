@@ -1,6 +1,6 @@
 export const site = {
   name: 'tato',
-  tagline: 'vocal · original · nocffie',
+  tagline: 'vocal/rap',
   description: 'tato の公式サイト。歌、オリジナル曲、nocffie の活動について。',
   profile: {
     name: 'tato',
@@ -14,5 +14,9 @@ export const site = {
     x: 'https://x.com/TaTo_6a6y',
     youtube: 'https://www.youtube.com/@tat040',
     nocffieYoutube: 'https://www.youtube.com/@nocffie',
+    niconico: '#',
+    soundcloud: '#',
+    spotify: '#',
+    appleMusic: '#',
   },
 } as const;

@@ -1,0 +1,66 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout>
+  <section class="admin-card admin-dashboard">
+    <h2 class="admin-card-title">edit</h2>
+    <p class="admin-hint">保存すると GitHub に commit され、Cloudflare Pages が自動で再ビルドします。</p>
+    <ul class="admin-nav-grid" aria-label="編集メニュー">
+      <li>
+        <a class="admin-nav-tile" href="https://babytato.link/" target="_blank" rel="noopener noreferrer">
+          <span class="admin-nav-tile__label">public site</span>
+          <span class="admin-nav-tile__hint">babytato.link ↗</span>
+        </a>
+      </li>
+      <li>
+        <span class="admin-nav-tile" aria-disabled="true">
+          <span class="admin-nav-tile__label">site info</span>
+          <span class="admin-nav-tile__hint">coming soon</span>
+        </span>
+      </li>
+      <li>
+        <span class="admin-nav-tile" aria-disabled="true">
+          <span class="admin-nav-tile__label">news</span>
+          <span class="admin-nav-tile__hint">coming soon</span>
+        </span>
+      </li>
+      <li>
+        <span class="admin-nav-tile" aria-disabled="true">
+          <span class="admin-nav-tile__label">links</span>
+          <span class="admin-nav-tile__hint">coming soon</span>
+        </span>
+      </li>
+    </ul>
+  </section>
+
+  <section class="admin-card">
+    <h2 class="admin-card-title">session</h2>
+    <p id="session-user" class="admin-loading">checking…</p>
+  </section>
+
+  <section class="admin-card">
+    <p class="admin-coming-soon">
+      コンテンツ編集 API は今後追加予定です。現時点ではログイン・セッション管理のみ利用できます。
+    </p>
+  </section>
+</AdminLayout>
+
+<script>
+  import { requireSession } from "../../scripts/admin/client";
+
+  async function init() {
+    try {
+      const session = await requireSession();
+      const userEl = document.getElementById("session-user");
+      if (userEl && session.username) {
+        userEl.textContent = `${session.username} logged in`;
+        userEl.className = "";
+      }
+    } catch {
+      // redirect handled in requireSession
+    }
+  }
+
+  init();
+</script>

@@ -2,84 +2,607 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsItem from '../components/NewsItem.astro';
 import { getCollection } from 'astro:content';
+import SocialLinkGrid from '../components/SocialLinkGrid.astro';
+import VideoCarousel from '../components/VideoCarousel.astro';
 import { site } from '../data/site';
-import { links } from '../data/links';
+import { getTatoYouTubeVideos } from '../lib/youtube';
 
 const newsEntries = (await getCollection('news'))
   .filter((entry) => !entry.data.draft)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const latestVideos = await getTatoYouTubeVideos(10);
+const newsScrollable = newsEntries.length >= 3;
+
+const motto = 'やりたいことを、やりたいだけやる';
 ---
 
-<BaseLayout>
-  <section class="intro">
-    <h1 class="intro__name">{site.name}</h1>
-    <p class="intro__tagline">{site.tagline}</p>
-    <p class="intro__bio">{site.profile.paragraphs[0]}</p>
-  </section>
+<BaseLayout home>
+  <article class="poster">
+    <header class="mast">
+      <h1 class="mast__title">{site.name}</h1>
+      <svg class="mast__ornament" viewBox="0 0 720 72" aria-hidden="true">
+        <line x1="0" y1="36" x2="250" y2="36" />
+        <line x1="470" y1="36" x2="720" y2="36" />
+        <line x1="250" y1="36" x2="360" y2="8" />
+        <line x1="360" y1="8" x2="470" y2="36" />
+        <line x1="250" y1="36" x2="360" y2="64" />
+        <line x1="360" y1="64" x2="470" y2="36" />
+        <ellipse cx="360" cy="36" rx="78" ry="18" />
+        <ellipse cx="360" cy="36" rx="48" ry="11" />
+        <circle cx="360" cy="36" r="3" fill="currentColor" stroke="none" />
+      </svg>
+    </header>
 
-  <section class="section">
-    <h2 class="section-label">news</h2>
-    {
-      newsEntries.length > 0 ? (
-        <ul class="list-plain">
-          {newsEntries.map((entry) => (
-            <NewsItem entry={entry} />
-          ))}
-        </ul>
-      ) : (
-        <p class="empty">お知らせはまだありません。</p>
-      )
-    }
-  </section>
+    <section class="holo" data-holo>
+      <!-- holo compositing: see docs/HOLO-COMPOSITING.md — do not restructure without reading -->
+      <div class="holo__scene" aria-hidden="true">
+        <div class="holo__composite">
+          <img
+            class="holo__field"
+            src="/holo-field.png"
+            alt=""
+            width="1536"
+            height="1024"
+            decoding="async"
+          />
+          <img
+            class="holo__illust"
+            src="/tato-illust.jpg"
+            alt=""
+            width="2048"
+            height="1152"
+            decoding="async"
+          />
+        </div>
+      </div>
+      <p class="holo__kicker">official</p>
+      <p class="holo__tag">{site.tagline}</p>
+      <button class="holo__arrow" type="button" aria-expanded="false" aria-controls="holo-profile">
+        <span aria-hidden="true">↘</span>
+        <span class="visually-hidden">プロフィールを開く</span>
+      </button>
+      <p class="holo__bio">{site.profile.paragraphs[0]}</p>
+      <div class="holo__profile" id="holo-profile">
+        <p class="holo__label">profile</p>
+        {
+          site.profile.paragraphs.map((paragraph) => (
+            <p>{paragraph}</p>
+          ))
+        }
+      </div>
+    </section>
 
-  <section class="section">
-    <h2 class="section-label">links</h2>
-    <ul class="list-plain links">
-      {
-        links.map((link) => (
-          <li>
-            <a href={link.url} target="_blank" rel="noopener noreferrer">
-              {link.label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
+    <section class="base">
+      <h2 class="base__banner">{motto}</h2>
+      <p class="base__num">729</p>
+      <div class="base__news">
+        <p class="base__label">news</p>
+        <div class:list={['base__news-scroll', { 'base__news-scroll--scrollable': newsScrollable }]}>
+          {
+            newsEntries.map((entry) => (
+              <NewsItem entry={entry} />
+            ))
+          }
+        </div>
+      </div>
+      <div class="base__links">
+        <SocialLinkGrid />
+        <svg class="base__bar" viewBox="0 0 220 48" aria-hidden="true">
+          <rect x="0" y="4" width="4" height="40" />
+          <rect x="8" y="4" width="2" height="40" />
+          <rect x="14" y="4" width="6" height="40" />
+          <rect x="24" y="4" width="2" height="40" />
+          <rect x="30" y="4" width="4" height="40" />
+          <rect x="38" y="4" width="2" height="40" />
+          <rect x="44" y="4" width="8" height="40" />
+          <rect x="56" y="4" width="2" height="40" />
+          <rect x="62" y="4" width="3" height="40" />
+          <rect x="70" y="4" width="2" height="40" />
+          <rect x="76" y="4" width="6" height="40" />
+          <rect x="86" y="4" width="2" height="40" />
+          <rect x="92" y="4" width="4" height="40" />
+          <rect x="100" y="4" width="2" height="40" />
+          <rect x="106" y="4" width="8" height="40" />
+          <rect x="118" y="4" width="2" height="40" />
+          <rect x="124" y="4" width="3" height="40" />
+          <rect x="132" y="4" width="2" height="40" />
+          <rect x="138" y="4" width="5" height="40" />
+          <rect x="148" y="4" width="2" height="40" />
+          <rect x="154" y="4" width="7" height="40" />
+          <rect x="165" y="4" width="2" height="40" />
+          <rect x="171" y="4" width="4" height="40" />
+          <rect x="179" y="4" width="2" height="40" />
+          <rect x="185" y="4" width="6" height="40" />
+          <rect x="195" y="4" width="2" height="40" />
+          <rect x="201" y="4" width="3" height="40" />
+          <rect x="208" y="4" width="12" height="40" />
+        </svg>
+      </div>
+    </section>
+
+    {latestVideos.length > 0 && <VideoCarousel videos={latestVideos} />}
+  </article>
 </BaseLayout>
 
 <style>
-  .intro__name {
+  @property --mask-fade {
+    syntax: '<percentage>';
+    inherits: true;
+    initial-value: 100%;
+  }
+
+  @property --illust-anchor {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 1;
+  }
+
+  @property --profile-reveal {
+    syntax: '<percentage>';
+    inherits: true;
+    initial-value: 0%;
+  }
+
+  .poster {
+    display: grid;
+    gap: 0;
+  }
+
+  .mast {
+    padding: 1.1rem 1.15rem 0.35rem;
+  }
+
+  .mast__title {
     margin: 0;
-    font-size: clamp(2rem, 8vw, 2.75rem);
-    font-weight: 300;
-    letter-spacing: 0.18em;
+    font-family: var(--font-display);
+    font-size: clamp(5.2rem, 22vw, 12rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 0.78;
+    text-align: center;
     text-transform: lowercase;
+    color: transparent;
+    -webkit-text-stroke: 2px var(--ink);
   }
 
-  .intro__tagline {
-    margin: 1rem 0 0;
-    color: var(--color-muted);
-    font-size: 0.8rem;
-    letter-spacing: 0.12em;
-    text-transform: lowercase;
+  .mast__ornament {
+    display: block;
+    width: min(100%, 42rem);
+    height: auto;
+    margin: 0.15rem auto 0.55rem;
+    stroke: var(--ink);
+    fill: none;
+    stroke-width: 1.6;
   }
 
-  .intro__bio {
-    margin: 2.5rem 0 0;
-    max-width: 32rem;
-    font-size: 0.95rem;
+  /*
+   * HOLO COMPOSITING — DO NOT CHANGE without reading docs/HOLO-COMPOSITING.md
+   * 1. holo-field + JPG illust must be siblings inside .holo__composite (NOT ::before)
+   * 2. Use tato-illust.jpg (black bg) + mix-blend-mode: lighten — NOT PNG-only
+   * 3. Never put isolation: isolate on .holo (breaks blend with holo-field)
+   * 4. .holo__composite isolation is OK — it only wraps field + illust
+   */
+  .holo {
+    --holo-h: min(62vh, 34rem);
+    --holo-open-duration: 0.78s;
+    --holo-close-duration: 0.88s;
+    --holo-open-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --holo-close-ease: cubic-bezier(0.45, 0, 0.55, 1);
+    --mask-fade: 100%;
+    --illust-anchor: 1;
+    --profile-reveal: 0%;
+    position: relative;
+    min-height: var(--holo-h);
+    margin: 0;
+    overflow: hidden;
+    border-block: 2px solid var(--line);
+    border-inline: 0;
+    color: #fff;
+    transition:
+      min-height var(--holo-close-duration) var(--holo-close-ease),
+      --mask-fade var(--holo-close-duration) var(--holo-close-ease),
+      --illust-anchor var(--holo-close-duration) var(--holo-close-ease),
+      --profile-reveal var(--holo-close-duration) var(--holo-close-ease);
   }
 
-  .links > li + li {
-    margin-top: 0.75rem;
-    padding-top: 0;
-    border-top: none;
+  .holo.is-open {
+    --mask-fade: 28%;
+    --illust-anchor: 0;
+    --profile-reveal: 130%;
+    min-height: calc(var(--holo-h) + 18rem);
+    transition:
+      min-height var(--holo-open-duration) var(--holo-open-ease),
+      --mask-fade var(--holo-open-duration) var(--holo-open-ease),
+      --illust-anchor var(--holo-open-duration) var(--holo-open-ease),
+      --profile-reveal 0.86s var(--holo-open-ease) 0.18s;
   }
 
-  .links a {
-    font-size: 0.95rem;
-    text-decoration: none;
+  .holo__scene {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .holo__composite {
+    position: absolute;
+    inset: 0;
+    isolation: isolate;
+  }
+
+  .holo__field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  .holo__illust {
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%)
+      translateY(calc(var(--illust-anchor) * (var(--holo-h) - 100%)));
+    display: block;
+    max-height: var(--holo-h);
+    max-width: none;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    object-position: center top;
+    mix-blend-mode: lighten;
+    -webkit-mask-image: linear-gradient(180deg, #000 var(--mask-fade), transparent 100%);
+    mask-image: linear-gradient(180deg, #000 var(--mask-fade), transparent 100%);
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+
+  .holo__kicker,
+  .holo__tag,
+  .holo__arrow,
+  .holo__bio {
+    position: absolute;
+    z-index: 2;
+  }
+
+  .holo__kicker {
+    top: 0.85rem;
+    left: 0.95rem;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+
+  .holo__tag {
+    top: 0.85rem;
+    right: 0.95rem;
+    margin: 0;
+    max-width: 14rem;
+    text-align: right;
+    font-size: 0.72rem;
+    line-height: 1.45;
+  }
+
+  .holo__arrow {
+    left: 0.85rem;
+    top: calc(var(--holo-h) - 3.7rem);
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    padding: 0;
+    border: 2px solid #fff;
+    background: transparent;
+    color: #fff;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.35s ease, background 0.2s ease, color 0.2s ease;
+  }
+
+  .holo__arrow:hover {
+    background: #fff;
+    color: #111;
+  }
+
+  .holo.is-open .holo__arrow {
+    transform: rotate(180deg);
+  }
+
+  .holo__bio {
+    left: 4rem;
+    right: 1rem;
+    bottom: 1.05rem;
+    margin: 0;
+    max-width: 28rem;
+    font-size: 0.78rem;
+    line-height: 1.65;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 0.42s var(--holo-close-ease) 0.22s,
+      visibility 0s linear 0.22s;
+  }
+
+  .holo.is-open .holo__bio {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.35s var(--holo-open-ease),
+      visibility 0s linear 0.35s;
+  }
+
+  .holo__profile {
+    position: relative;
+    z-index: 2;
+    max-width: 36rem;
+    margin: 0 1.35rem 0 4rem;
+    max-height: 0;
+    padding: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      #000 0%,
+      #000 max(0%, calc(var(--profile-reveal) - 32%)),
+      transparent var(--profile-reveal)
+    );
+    mask-image: linear-gradient(
+      180deg,
+      #000 0%,
+      #000 max(0%, calc(var(--profile-reveal) - 32%)),
+      transparent var(--profile-reveal)
+    );
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    transition:
+      max-height var(--holo-close-duration) var(--holo-close-ease),
+      padding var(--holo-close-duration) var(--holo-close-ease),
+      opacity var(--holo-close-duration) var(--holo-close-ease),
+      visibility 0s linear var(--holo-close-duration);
+  }
+
+  .holo.is-open .holo__profile {
+    max-height: 48rem;
+    padding: calc(var(--holo-h) - 3.4rem) 0 2.2rem;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      max-height var(--holo-open-duration) var(--holo-open-ease),
+      padding var(--holo-open-duration) var(--holo-open-ease),
+      opacity 0.69s var(--holo-open-ease) 0.23s,
+      visibility 0s linear 0s;
+  }
+
+  .holo__label {
+    margin: 0 0 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+
+  .holo__profile p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.75;
+  }
+
+  .holo__profile p + p {
+    margin-top: 1.1rem;
+  }
+
+  .base {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'banner num'
+      'news links';
+    gap: 0;
+    margin: 0;
+    border-top: 2px solid var(--line);
+  }
+
+  .base__banner {
+    grid-area: banner;
+    margin: 0;
+    padding: 0.9rem 1.15rem 0.75rem;
+    border-right: 2px solid var(--line);
+    border-bottom: 2px solid var(--line);
+    font-family: var(--font);
+    font-size: clamp(1.15rem, 3.4vw, 2rem);
+    font-weight: 900;
     letter-spacing: 0.06em;
+    line-height: 1.2;
+    color: transparent;
+    -webkit-text-stroke: 1.15px var(--ink);
+  }
+
+  .base__num {
+    grid-area: num;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    min-width: 7.5rem;
+    padding: 0.4rem 1rem;
+    border-bottom: 2px solid var(--line);
+    font-family: var(--font-display);
+    font-size: clamp(3.4rem, 10vw, 5.6rem);
+    font-weight: 800;
+    line-height: 0.8;
+    letter-spacing: 0.04em;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--ink);
+  }
+
+  .base__news {
+    grid-area: news;
+    padding: 1.1rem 1.15rem 1.4rem;
+    border-right: 2px solid var(--line);
+  }
+
+  .base__label {
+    margin: 0 0 0.85rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+
+  .base__news-scroll--scrollable {
+    max-height: 12.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+
+  .base__news-scroll--scrollable::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .base__news-scroll--scrollable::-webkit-scrollbar-thumb {
+    background: var(--line);
+  }
+
+  .base__links {
+    grid-area: links;
+    display: grid;
+    align-content: start;
+    min-width: 12.5rem;
+  }
+
+  .base__links :global(.social-grid) {
+    padding-bottom: 0.35rem;
+  }
+
+  .base__bar {
+    width: 100%;
+    height: 3.2rem;
+    padding: 0.55rem 0.8rem 0.4rem;
+    fill: var(--ink);
+  }
+
+  @media (max-width: 720px) {
+    .holo {
+      --holo-h: 28rem;
+    }
+
+    .holo__tag {
+      display: none;
+    }
+
+    .holo__bio,
+    .holo__profile {
+      left: 0.85rem;
+      margin-left: 0.85rem;
+    }
+
+    .holo__bio {
+      bottom: 0.85rem;
+    }
+
+    .holo.is-open .holo__arrow {
+      left: 0.85rem;
+    }
+
+    .base {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        'banner'
+        'num'
+        'news'
+        'links';
+    }
+
+    .base__banner,
+    .base__news {
+      border-right: 0;
+    }
+
+    .base__num {
+      min-width: 0;
+      justify-items: start;
+      padding-left: 1.15rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .holo,
+    .holo__scene,
+    .holo__illust,
+    .holo__arrow,
+    .holo__bio,
+    .holo__profile {
+      transition: none;
+    }
+
+    .holo.is-open {
+      --mask-fade: 28%;
+      --illust-anchor: 0;
+      --profile-reveal: 130%;
+    }
+
+    .holo:not(.is-open) .holo__profile {
+      max-height: 0;
+      padding: 0;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .holo.is-open .holo__profile {
+      max-height: none;
+      padding: calc(var(--holo-h) - 3.4rem) 0 2.2rem;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .holo.is-open .holo__bio {
+      opacity: 0;
+      visibility: hidden;
+    }
   }
 </style>
+
+<script is:inline>
+  (function () {
+    var holo = document.querySelector('[data-holo]');
+    var btn = document.querySelector('.holo__arrow');
+    if (!holo || !btn) return;
+
+    var label = btn.querySelector('.visually-hidden');
+    var COOLDOWN_MS = 750;
+
+    btn.addEventListener('click', function () {
+      if (btn.disabled) return;
+
+      btn.disabled = true;
+      btn.setAttribute('aria-disabled', 'true');
+
+      var open = holo.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (label) label.textContent = open ? 'プロフィールを閉じる' : 'プロフィールを開く';
+
+      setTimeout(function () {
+        btn.disabled = false;
+        btn.removeAttribute('aria-disabled');
+      }, COOLDOWN_MS);
+    });
+  })();
+</script>
+

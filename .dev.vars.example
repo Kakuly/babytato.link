@@ -1,0 +1,9 @@
+# ローカル検証用（git には含めない）。コピーして .dev.vars にリネーム。
+ADMIN_USER_1=tato
+ADMIN_PASS_1=change-me-tato
+ADMIN_USER_2=kakuly
+ADMIN_PASS_2=change-me-kakuly
+SESSION_SECRET=local-dev-secret-change-me-32chars-min
+GITHUB_TOKEN=ghp_your_token_here
+GITHUB_REPO=kakuly/babytato.link
+GITHUB_BRANCH=main

@@ -8,7 +8,17 @@ export type YouTubeVideo = {
   published: Date;
   source: YouTubeSource;
   sourceLabel: string;
+  thumbnailUrl?: string;
 };
+
+const THUMBNAIL_VARIANTS = ['maxresdefault', 'sddefault', 'hqdefault', 'mqdefault'] as const;
+
+/** maxresdefault returns a ~1 KB placeholder when unavailable; real assets are much larger. */
+const MIN_MAXRES_BYTES = 5_000;
+
+function thumbnailUrlFor(videoId: string, variant: (typeof THUMBNAIL_VARIANTS)[number]): string {
+  return `https://i.ytimg.com/vi/${videoId}/${variant}.jpg`;
+}
 
 function decodeXml(text: string): string {
   return text
@@ -41,6 +51,69 @@ function parseFeed(xml: string, source: YouTubeSource, sourceLabel: string): You
   }
 
   return videos;
+}
+
+async function readContentLength(url: string): Promise<number> {
+  const headers = { 'User-Agent': 'babytato.link/build' };
+
+  const head = await fetch(url, { method: 'HEAD', headers });
+  if (head.ok) {
+    const length = Number(head.headers.get('content-length') ?? 0);
+    if (length > 0) return length;
+  }
+
+  const range = await fetch(url, { headers: { ...headers, Range: 'bytes=0-0' } });
+  if (!range.ok) return 0;
+
+  const total = range.headers.get('content-range')?.split('/')[1];
+  return Number(total ?? 0);
+}
+
+async function probeThumbnailVariant(
+  videoId: string,
+  variant: (typeof THUMBNAIL_VARIANTS)[number],
+): Promise<boolean> {
+  const url = thumbnailUrlFor(videoId, variant);
+
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD',
+      headers: { 'User-Agent': 'babytato.link/build' },
+    });
+
+    if (!response.ok) return false;
+
+    if (variant !== 'maxresdefault') return true;
+
+    const length = Number(response.headers.get('content-length') ?? 0);
+    if (length >= MIN_MAXRES_BYTES) return true;
+    if (length > 0 && length < MIN_MAXRES_BYTES) return false;
+
+    const totalLength = await readContentLength(url);
+    return totalLength >= MIN_MAXRES_BYTES;
+  } catch {
+    return false;
+  }
+}
+
+/** Resolve and lock the highest-quality thumbnail URL available for a single video. */
+export async function resolveVideoThumbnailUrl(videoId: string): Promise<string> {
+  for (const variant of THUMBNAIL_VARIANTS) {
+    if (await probeThumbnailVariant(videoId, variant)) {
+      return thumbnailUrlFor(videoId, variant);
+    }
+  }
+
+  return thumbnailUrlFor(videoId, 'mqdefault');
+}
+
+async function lockVideoThumbnails(videos: YouTubeVideo[]): Promise<YouTubeVideo[]> {
+  return Promise.all(
+    videos.map(async (video) => ({
+      ...video,
+      thumbnailUrl: await resolveVideoThumbnailUrl(video.id),
+    })),
+  );
 }
 
 async function fetchChannelVideos(
@@ -77,4 +150,12 @@ export async function getYouTubeVideos(): Promise<YouTubeVideo[]> {
   return results
     .flat()
     .sort((a, b) => b.published.getTime() - a.published.getTime());
+}
+
+export async function getTatoYouTubeVideos(limit = 10): Promise<YouTubeVideo[]> {
+  const channel = youtubeChannels.find(({ source }) => source === 'tato');
+  if (!channel) return [];
+
+  const videos = await fetchChannelVideos(channel.channelId, channel.source, channel.label);
+  return lockVideoThumbnails(videos.slice(0, limit));
 }

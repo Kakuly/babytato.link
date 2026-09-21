@@ -1,0 +1,323 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Share+Tech+Mono&display=swap');
+
+:root {
+  color-scheme: light;
+  --void: #f6f6f4;
+  --ink: #111111;
+  --muted: #6a6a6a;
+  --line: #111111;
+  --font: 'Noto Sans JP', system-ui, sans-serif;
+  --font-display: 'Outfit', 'Noto Sans JP', sans-serif;
+  --font-mono: 'Share Tech Mono', ui-monospace, monospace;
+  --frame: 10px;
+  --space-2: 0.75rem;
+  --space-3: 1.25rem;
+  --space-4: 2rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--void);
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  margin: 0 0 var(--space-2);
+}
+
+.admin-shell {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3) 4rem;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--line);
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.admin-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-transform: lowercase;
+  background: var(--void);
+}
+
+.admin-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  text-transform: lowercase;
+}
+
+.admin-subtitle {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  letter-spacing: 0.12em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.admin-card {
+  background: var(--void);
+  border: 2px solid var(--line);
+  padding: var(--space-4);
+}
+
+.admin-card + .admin-card {
+  margin-top: var(--space-3);
+}
+
+.admin-card-title {
+  font-size: 1.15rem;
+  margin-bottom: var(--space-2);
+  text-transform: lowercase;
+}
+
+.admin-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.admin-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.admin-field label {
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.admin-field input {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: var(--void);
+  border: 2px solid var(--line);
+  padding: 0.75rem 0.85rem;
+}
+
+.admin-field input:focus {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: var(--space-3);
+}
+
+.admin-btn {
+  appearance: none;
+  border: 2px solid var(--line);
+  padding: 0.65rem 1.25rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--void);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-btn:hover {
+  background: var(--ink);
+  color: var(--void);
+  text-decoration: none;
+}
+
+.admin-btn-primary {
+  background: var(--ink);
+  color: var(--void);
+}
+
+.admin-btn-primary:hover {
+  background: var(--void);
+  color: var(--ink);
+}
+
+.admin-btn-ghost {
+  color: var(--muted);
+  border-color: transparent;
+  background: transparent;
+}
+
+.admin-btn-ghost:hover {
+  color: var(--ink);
+  background: transparent;
+  border-color: var(--line);
+}
+
+.admin-dashboard {
+  text-align: center;
+}
+
+.admin-hint {
+  margin: 0 0 var(--space-3);
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.admin-nav-grid {
+  list-style: none;
+  margin: var(--space-2) auto 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  max-width: 24rem;
+}
+
+.admin-nav-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 6.5rem;
+  padding: var(--space-2);
+  text-align: center;
+  border: 2px solid var(--line);
+  color: var(--ink);
+  font-weight: 700;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-nav-tile:hover {
+  background: var(--ink);
+  color: var(--void);
+  text-decoration: none;
+}
+
+.admin-nav-tile__label {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  text-transform: lowercase;
+}
+
+.admin-nav-tile__hint {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+}
+
+.admin-nav-tile:hover .admin-nav-tile__hint {
+  color: rgba(246, 246, 244, 0.7);
+}
+
+.admin-status {
+  margin-top: var(--space-2);
+  padding: 0.75rem 1rem;
+  font-size: 0.92rem;
+  display: none;
+  border: 2px solid var(--line);
+}
+
+.admin-status.is-visible {
+  display: block;
+}
+
+.admin-status.is-success {
+  background: var(--void);
+}
+
+.admin-status.is-error {
+  background: var(--ink);
+  color: var(--void);
+}
+
+.admin-login-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-3);
+}
+
+.admin-login-card {
+  width: min(100%, 420px);
+}
+
+.admin-login-badge {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  padding: 0.35rem 0.75rem;
+  border: 2px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-login-card h1 {
+  font-size: clamp(2.5rem, 10vw, 3.5rem);
+  font-weight: 800;
+  text-transform: lowercase;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--ink);
+}
+
+.admin-loading {
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-family: var(--font-mono);
+}
+
+.admin-coming-soon {
+  margin: 0;
+  padding: var(--space-3);
+  border: 2px dashed var(--line);
+  color: var(--muted);
+  font-size: 0.88rem;
+  text-align: center;
+}

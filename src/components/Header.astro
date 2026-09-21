@@ -2,9 +2,9 @@
 import { site } from '../data/site';
 
 const navItems = [
-  { href: '/', label: 'home' },
-  { href: '/works/', label: 'works' },
-  { href: '/about/', label: 'about' },
+  { href: '/', label: 'HOME' },
+  { href: '/works/', label: 'DISCOGRAPHY' },
+  { href: '/about/', label: 'CONTACT' },
 ];
 
 const currentPath = Astro.url.pathname;
@@ -33,7 +33,7 @@ const currentPath = Astro.url.pathname;
 
 <style>
   .header {
-    border-bottom: 1px solid var(--color-line);
+    border-bottom: 2px solid var(--line);
   }
 
   .header__inner {
@@ -41,35 +41,43 @@ const currentPath = Astro.url.pathname;
     align-items: center;
     justify-content: space-between;
     gap: 1.5rem;
-    width: min(calc(100% - 2.5rem), var(--max-width));
-    margin: 0 auto;
-    padding: 1.25rem 0;
+    padding: 0.85rem 1.35rem;
   }
 
   .logo {
-    font-size: 0.95rem;
-    font-weight: 400;
-    letter-spacing: 0.12em;
-    text-decoration: none;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
     text-transform: lowercase;
+    text-decoration: none;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--ink);
+  }
+
+  .logo:hover {
+    color: var(--ink);
+    -webkit-text-stroke: 0;
+    text-decoration: none;
   }
 
   .nav {
     display: flex;
-    gap: 1.25rem;
+    gap: 1.1rem;
   }
 
   .nav__link {
-    color: var(--color-muted);
-    font-size: 0.8rem;
-    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
     text-decoration: none;
-    text-transform: lowercase;
+    text-transform: uppercase;
   }
 
   .nav__link--active,
   .nav__link:hover {
-    color: var(--color-text);
-    opacity: 1;
+    color: var(--ink);
+    text-decoration: none;
   }
 </style>

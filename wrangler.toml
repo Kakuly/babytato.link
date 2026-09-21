@@ -1,0 +1,9 @@
+# Cloudflare Pages 用の設定。
+# Astro ビルド後の dist/ を配信します。
+name = "babytato-link"
+compatibility_date = "2026-09-21"
+pages_build_output_dir = "./dist"
+
+# ADMIN_* / SESSION_SECRET / GITHUB_TOKEN は Dashboard の Environment variables に設定。
+# wrangler.toml や git にシークレットを書かないこと。
+# セットアップ手順: docs/SETUP-AUTH.md
