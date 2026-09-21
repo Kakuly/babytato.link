@@ -25,6 +25,42 @@ nondesu の「おもちゃ箱 admin」と同じ方式: **ユーザー名/パス�
 
 ---
 
+## Cloudflare Pages ビルド設定（デプロイ失敗時は最初に確認）
+
+Dashboard → **Workers & Pages** → **`babytato-link`** → **Settings** → **Build**:
+
+| 項目 | 正しい値 |
+|------|----------|
+| **Build command** | `bun run build` |
+| **Build output directory** | `dist` |
+| **Deploy command** | `bun run pages:deploy`（空にできるなら **未設定がおすすめ**） |
+
+**Deploy command に `npx wrangler deploy` が入っているとデプロイが失敗します。**  
+`wrangler deploy` は Workers 用です。Pages では `wrangler pages deploy` を使います。
+
+`package.json` の `pages:deploy`:
+
+```text
+wrangler pages deploy dist --project-name=babytato-link --commit-dirty=true
+```
+
+Deploy command で wrangler を走らせる場合、**Settings → Environment variables**（Production / Preview）に追加:
+
+| 変数 | 必須 | 内容 |
+|------|------|------|
+| `CLOUDFLARE_API_TOKEN` | はい | API トークン — **Account → Cloudflare Pages → Edit** |
+| `CLOUDFLARE_ACCOUNT_ID` | 推奨 | Account ID（未設定時に wrangler がアカウントを特定できず失敗することがある） |
+
+bun なし環境の Deploy command:
+
+```text
+npx wrangler pages deploy dist --project-name=babytato-link --commit-dirty=true
+```
+
+設定変更後: **Deployments** → 失敗したデプロイ → **Retry deployment**、または main に push。
+
+---
+
 ## あなたがやること（順番どおり）
 
 ### 1. GitHub Personal Access Token を作成
@@ -177,6 +213,9 @@ bun run pages:dev -- --ip 127.0.0.1 --port 8788
 | 401「ログイン情報が正しくありません」 | ユーザー名の大文字小文字・余分なスペース |
 | ログイン後すぐ落ちる | HTTPS か（本番は OK）。Cookie がブロックされていないか |
 | `/api/admin/login` が 404 | `functions/` がデプロイされているか · 再デプロイ |
+| ビルド成功後に「Missing entry-point to Worker script」 | Deploy command が `wrangler deploy`（Workers 用）になっていないか → **`bun run pages:deploy` に変更して Retry** |
+| deploy 段階で `CLOUDFLARE_API_TOKEN` / non-interactive | Deploy command 使用時 → 上記 API トークンを Pages 環境変数に設定 |
+| `Could not find project` / アカウントエラー | プロジェクト名が **`babytato-link`** か · `CLOUDFLARE_ACCOUNT_ID` を設定 |
 
 ---
 

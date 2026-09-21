@@ -30,7 +30,8 @@ bun run dev -- --port 4322   # SITE ハブ前提。:4321 は nondesu と競合
 
 ## Site Studio
 
-- SITE → **tato**: dev 起動中は `:4322` iframe / 未起動は公開サイト
+- SITE → **tato**: 公開サイトは Astro dev 起動中 `:4322` iframe / 未起動は babytato.link
+- SITE → **tato** 管理画面: `pages:dev` 起動中 `:8788/admin/login/` iframe / 未起動は manage.babytato.link へ誘導
 - **CMS 未接続** — このリポジトリを直接編集
 - `admin/` ハブ UI 変更時のみ → `../discord-notify/bin/sync-jekyll-site`
 

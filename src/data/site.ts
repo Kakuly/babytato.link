@@ -1,6 +1,6 @@
 export const site = {
   name: 'tato',
-  tagline: 'vocal/rap',
+  tagline: 'VOCAL / RAP',
   description: 'tato の公式サイト。歌、オリジナル曲、nocffie の活動について。',
   profile: {
     name: 'tato',

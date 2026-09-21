@@ -187,6 +187,8 @@ const motto = 'やりたいことを、やりたいだけやる';
     --holo-h: min(62vh, 34rem);
     --holo-open-duration: 0.78s;
     --holo-close-duration: 0.88s;
+    --mask-fade-close-duration: 1.05s;
+    --mask-fade-close-delay: 0.14s;
     --holo-open-ease: cubic-bezier(0.22, 1, 0.36, 1);
     --holo-close-ease: cubic-bezier(0.45, 0, 0.55, 1);
     --mask-fade: 100%;
@@ -201,7 +203,7 @@ const motto = 'やりたいことを、やりたいだけやる';
     color: #fff;
     transition:
       min-height var(--holo-close-duration) var(--holo-close-ease),
-      --mask-fade var(--holo-close-duration) var(--holo-close-ease),
+      --mask-fade var(--mask-fade-close-duration) var(--holo-close-ease) var(--mask-fade-close-delay),
       --illust-anchor var(--holo-close-duration) var(--holo-close-ease),
       --profile-reveal var(--holo-close-duration) var(--holo-close-ease);
   }
@@ -288,8 +290,10 @@ const motto = 'やりたいことを、やりたいだけやる';
     margin: 0;
     max-width: 14rem;
     text-align: right;
+    font-family: var(--font-mono);
     font-size: 0.72rem;
-    line-height: 1.45;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
   }
 
   .holo__arrow {

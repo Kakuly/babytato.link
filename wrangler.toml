@@ -1,8 +1,16 @@
 # Cloudflare Pages 用の設定。
 # Astro ビルド後の dist/ を配信します。
+#
+# Git 連携デプロイ: Dashboard の Deploy command → bun run pages:deploy（wrangler deploy は使わない）。
+# Deploy command で wrangler を使う場合は Dashboard の Environment variables に
+# CLOUDFLARE_API_TOKEN（必須）と CLOUDFLARE_ACCOUNT_ID（推奨）を設定すること。
+# 手動デプロイ: bun run build && bun run pages:deploy
 name = "babytato-link"
 compatibility_date = "2026-09-21"
 pages_build_output_dir = "./dist"
+
+# Dashboard 右サイドバーの Account ID。未設定なら CLOUDFLARE_ACCOUNT_ID 環境変数でも可。
+# account_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # ADMIN_* / SESSION_SECRET / GITHUB_TOKEN は Dashboard の Environment variables に設定。
 # wrangler.toml や git にシークレットを書かないこと。

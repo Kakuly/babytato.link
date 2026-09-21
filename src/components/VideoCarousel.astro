@@ -188,12 +188,17 @@ const trackVideos = [...headClones, ...videos, ...tailClones];
 
     function layout() {
       const viewportWidth = root.clientWidth;
+      if (viewportWidth <= 0) return;
+
       const newItemWidth = viewportWidth / visible;
+      const previousItemWidth = itemWidth;
 
       if (offsetPx === null) {
         offsetPx = visible * newItemWidth;
-      } else if (itemWidth > 0) {
-        offsetPx = normalizeOffset((offsetPx / itemWidth) * newItemWidth);
+      } else if (previousItemWidth > 0) {
+        offsetPx = (offsetPx / previousItemWidth) * newItemWidth;
+      } else {
+        offsetPx = visible * newItemWidth;
       }
 
       itemWidth = newItemWidth;
@@ -202,6 +207,15 @@ const trackVideos = [...headClones, ...videos, ...tailClones];
         item.style.width = `${itemWidth}px`;
       });
 
+      if (!isDragging && itemWidth > 0) {
+        const base = baseOffset();
+        const span = loopSpan();
+        if (span > 0 && (offsetPx < base || offsetPx >= base + span)) {
+          offsetPx = offsetPx === 0 ? base : normalizeOffset(offsetPx);
+        }
+      }
+
+      animating = false;
       setTransform(offsetPx, false);
     }
 
@@ -363,6 +377,13 @@ const trackVideos = [...headClones, ...videos, ...tailClones];
     });
 
     window.addEventListener('resize', layout);
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const resizeObserver = new ResizeObserver(() => {
+        layout();
+      });
+      resizeObserver.observe(root);
+    }
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
