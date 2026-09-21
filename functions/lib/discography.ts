@@ -14,7 +14,6 @@ export type DiscographyEntry = {
   date?: string;
   img: string;
   url?: string;
-  tracks?: string[];
 };
 
 export type DiscographyData = {
@@ -52,16 +51,6 @@ function asTrimmedString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function parseTracks(value: unknown): string[] | undefined {
-  if (value == null) return undefined;
-  if (!Array.isArray(value)) return undefined;
-  const tracks = value
-    .filter((item): item is string => typeof item === "string")
-    .map((item) => item.trim())
-    .filter(Boolean);
-  return tracks.length > 0 ? tracks : undefined;
-}
-
 function parseEntry(value: unknown): DiscographyEntry | null {
   if (!value || typeof value !== "object") return null;
   const input = value as Record<string, unknown>;
@@ -78,11 +67,9 @@ function parseEntry(value: unknown): DiscographyEntry | null {
   if (date && !DATE_RE.test(date)) return null;
   if (url && url !== "#" && !/^https?:\/\//i.test(url)) return null;
 
-  const tracks = parseTracks(input.tracks);
   const entry: DiscographyEntry = { id, title, type, img };
   if (date) entry.date = date;
   if (url) entry.url = url;
-  if (tracks) entry.tracks = tracks;
   return entry;
 }
 

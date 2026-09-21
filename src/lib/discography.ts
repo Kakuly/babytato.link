@@ -9,7 +9,6 @@ export type DiscographyEntry = {
   date?: string;
   img: string;
   url?: string;
-  tracks?: string[];
 };
 
 export type DiscographyData = {

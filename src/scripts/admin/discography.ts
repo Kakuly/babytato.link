@@ -10,7 +10,6 @@ export type DiscographyEntry = {
   date?: string;
   img: string;
   url?: string;
-  tracks?: string[];
 };
 
 export type DiscographyData = {
@@ -45,8 +44,8 @@ function uniqueId(base: string, data: DiscographyData, ignore?: string): string 
 
 function cloneData(data: DiscographyData): DiscographyData {
   return {
-    collabo: data.collabo.map((entry) => ({ ...entry, tracks: entry.tracks ? [...entry.tracks] : undefined })),
-    myReleases: data.myReleases.map((entry) => ({ ...entry, tracks: entry.tracks ? [...entry.tracks] : undefined })),
+    collabo: data.collabo.map((entry) => ({ ...entry })),
+    myReleases: data.myReleases.map((entry) => ({ ...entry })),
   };
 }
 
@@ -80,7 +79,6 @@ export async function initDiscographyEditor(): Promise<void> {
   const typeInput = document.getElementById("disco-type") as HTMLSelectElement | null;
   const dateInput = document.getElementById("disco-date") as HTMLInputElement | null;
   const urlInput = document.getElementById("disco-url") as HTMLInputElement | null;
-  const tracksInput = document.getElementById("disco-tracks") as HTMLTextAreaElement | null;
   const headingEl = document.getElementById("disco-form-heading");
 
   let fileSha = "";
@@ -152,7 +150,6 @@ export async function initDiscographyEditor(): Promise<void> {
     if (typeInput) typeInput.value = entry.type;
     if (dateInput) dateInput.value = entry.date ?? "";
     if (urlInput) urlInput.value = entry.url ?? "";
-    if (tracksInput) tracksInput.value = entry.tracks?.join("\n") ?? "";
     updatePreview(entry.img);
   }
 
@@ -252,10 +249,6 @@ export async function initDiscographyEditor(): Promise<void> {
     const id = idInput?.value.trim() ?? "";
     const date = dateInput?.value.trim() ?? "";
     const url = urlInput?.value.trim() ?? "";
-    const tracks = (tracksInput?.value ?? "")
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
     const existing = editingId ? findEntry(editingId)?.entry : undefined;
     const img = existing?.img ?? "";
 
@@ -283,7 +276,6 @@ export async function initDiscographyEditor(): Promise<void> {
     const entry: DiscographyEntry = { id, title, type, img };
     if (date) entry.date = date;
     if (url) entry.url = url;
-    if (tracks.length) entry.tracks = tracks;
     return entry;
   }
 

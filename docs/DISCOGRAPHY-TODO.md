@@ -52,7 +52,7 @@ Phase 1（SNS リンク編集）完了後の実装ロードマップ。nocffie �
 - [x] GitHub Contents API で `discography.json` read/write（links API と同パターン）
 - [x] ジャケット画像: `public/releases/` へ GitHub Contents API でアップロード（R2 未設定のため）
 - [x] `/admin/discography/` — collabo / my releases タブ
-- [x] 各行: ジャケット · タイトル · type · date · URL · tracks
+- [x] 各行: ジャケット · タイトル · type · date · URL
 - [x] 追加 / 削除（公開ページは date desc で表示）
 
 ### Phase 2b — News WYSIWYG
