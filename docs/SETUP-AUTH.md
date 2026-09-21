@@ -38,23 +38,48 @@ Dashboard → **Workers & Pages** → **`babytato-link`** → **Settings** → *
 **Deploy command に `npx wrangler deploy` が入っているとデプロイが失敗します。**  
 `wrangler deploy` は Workers 用です。Pages では `wrangler pages deploy` を使います。
 
-`package.json` の `pages:deploy`:
+`package.json` の `pages:deploy`（ビルド後の deploy 段階）:
 
 ```text
-wrangler pages deploy dist --project-name=babytato-link --commit-dirty=true
+rm -rf node_modules/.cache/wrangler 2>/dev/null; wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true --log-level=info
+```
+
+**Dashboard → Settings → Build → Deploy command**（bun あり）:
+
+```text
+bun run pages:deploy
 ```
 
 Deploy command で wrangler を走らせる場合、**Settings → Environment variables**（Production / Preview）に追加:
 
 | 変数 | 必須 | 内容 |
 |------|------|------|
-| `CLOUDFLARE_API_TOKEN` | はい | API トークン — **Account → Cloudflare Pages → Edit** |
-| `CLOUDFLARE_ACCOUNT_ID` | 推奨 | Account ID（未設定時に wrangler がアカウントを特定できず失敗することがある） |
+| `CLOUDFLARE_API_TOKEN` | はい | API トークン（下記「トークン権限」参照） |
+| `CLOUDFLARE_ACCOUNT_ID` | はい（CI） | `4d3287a19985d6acc5d19bacf2178d24` |
+
+**API トークン権限（Deploy command / wrangler 用）**
+
+- **Account** → **Cloudflare Pages** → **Edit**
+- **User** → **User Memberships** → **Read**（`wrangler whoami` でアカウント一覧を取るのに必要。無いと auth 成功後に deploy が exit 1 になることがある）
+
+> wrangler **4.40** には `pages deploy` 用の `--account-id` フラグは**ありません**。アカウントは `CLOUDFLARE_ACCOUNT_ID` 環境変数か `wrangler.toml` の `account_id` で指定します。
+
+**wrangler の pages.json キャッシュ**
+
+CI で別アカウント ID に切り替えたのに古いアカウントが使われる場合、`node_modules/.cache/wrangler` が `CLOUDFLARE_ACCOUNT_ID` を無視することがあります。`pages:deploy` スクリプトはデプロイ前にこのキャッシュを削除します。
 
 bun なし環境の Deploy command:
 
 ```text
-npx wrangler pages deploy dist --project-name=babytato-link --commit-dirty=true
+rm -rf node_modules/.cache/wrangler 2>/dev/null; npx wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true --log-level=info
+```
+
+**（実験）Git 連携だけで dist が上がる場合**
+
+Deploy command を空にできない UI では、ビルド成果物の自動アップロードに任せる試行として次を使う人もいます（**二重デプロイや挙動差があるため自己責任・要確認**）:
+
+```text
+true
 ```
 
 設定変更後: **Deployments** → 失敗したデプロイ → **Retry deployment**、または main に push。
@@ -215,7 +240,9 @@ bun run pages:dev -- --ip 127.0.0.1 --port 8788
 | `/api/admin/login` が 404 | `functions/` がデプロイされているか · 再デプロイ |
 | ビルド成功後に「Missing entry-point to Worker script」 | Deploy command が `wrangler deploy`（Workers 用）になっていないか → **`bun run pages:deploy` に変更して Retry** |
 | deploy 段階で `CLOUDFLARE_API_TOKEN` / non-interactive | Deploy command 使用時 → 上記 API トークンを Pages 環境変数に設定 |
-| `Could not find project` / アカウントエラー | プロジェクト名が **`babytato-link`** か · `CLOUDFLARE_ACCOUNT_ID` を設定 |
+| `Could not find project` / アカウントエラー | プロジェクト名が **`babytato-link`** か · `CLOUDFLARE_ACCOUNT_ID=4d3287a19985d6acc5d19bacf2178d24` · `wrangler.toml` の `account_id` |
+| auth 成功（whoami）の直後に deploy が exit 1・ログが少ない | トークンに **User Memberships Read** があるか · `rm -rf node_modules/.cache/wrangler` 後に再 deploy · `--log-level=info` |
+| 複数アカウントで CI が非対話エラー | `CLOUDFLARE_ACCOUNT_ID` を必ず設定（上記 ID） |
 
 ---
 
