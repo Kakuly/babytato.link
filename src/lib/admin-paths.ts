@@ -25,3 +25,7 @@ export function adminNewsEditPath(slug?: string): string {
   const base = isManageHost() ? "/news/edit/" : "/admin/news/edit/";
   return slug ? `${base}?slug=${encodeURIComponent(slug)}` : base;
 }
+
+export function adminDiscographyPath(): string {
+  return isManageHost() ? "/discography/" : "/admin/discography/";
+}

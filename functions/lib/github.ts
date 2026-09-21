@@ -56,10 +56,19 @@ export async function readGitHubFile(env: PagesEnv, path: string): Promise<GitHu
   return { path, content, sha: "" };
 }
 
-export async function writeGitHubFile(
+function uint8ToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  const chunk = 0x2000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
+async function putGitHubContent(
   env: PagesEnv,
   path: string,
-  content: string,
+  contentBase64: string,
   sha: string | undefined,
   message: string,
 ): Promise<{ sha: string }> {
@@ -74,7 +83,7 @@ export async function writeGitHubFile(
 
   const body: Record<string, string> = {
     message,
-    content: btoa(unescape(encodeURIComponent(content))),
+    content: contentBase64,
     branch,
   };
   if (sha) body.sha = sha;
@@ -95,6 +104,47 @@ export async function writeGitHubFile(
 
   const data = (await response.json()) as { content?: { sha?: string } };
   return { sha: data.content?.sha ?? "" };
+}
+
+export async function writeGitHubFile(
+  env: PagesEnv,
+  path: string,
+  content: string,
+  sha: string | undefined,
+  message: string,
+): Promise<{ sha: string }> {
+  return putGitHubContent(env, path, btoa(unescape(encodeURIComponent(content))), sha, message);
+}
+
+export async function writeGitHubBinaryFile(
+  env: PagesEnv,
+  path: string,
+  bytes: Uint8Array,
+  sha: string | undefined,
+  message: string,
+): Promise<{ sha: string }> {
+  return putGitHubContent(env, path, uint8ToBase64(bytes), sha, message);
+}
+
+export async function getGitHubFileSha(env: PagesEnv, path: string): Promise<string | null> {
+  const token = env.GITHUB_TOKEN?.trim();
+  const repo = githubRepo(env);
+  const branch = githubBranch(env);
+  const url = `https://api.github.com/repos/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`;
+
+  if (!token) {
+    throw new Error("GITHUB_TOKEN が未設定です。Cloudflare Dashboard または .dev.vars に設定してください。");
+  }
+
+  const response = await fetch(url, { headers: authHeaders(token) });
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    const body = (await response.json().catch(() => ({}))) as GitHubContentsResponse;
+    throw new Error(body.message ?? `GitHub stat failed (${response.status})`);
+  }
+
+  const data = (await response.json()) as GitHubContentsResponse;
+  return data.sha ?? null;
 }
 
 interface GitHubContentsListItem {

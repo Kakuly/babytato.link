@@ -49,20 +49,19 @@ Phase 1（SNS リンク編集）完了後の実装ロードマップ。nocffie �
 
 ### Phase 2a — Discography 管理 API + UI
 
-- [ ] GitHub Contents API で `discography.json` read/write（links API と同パターン）
-- [ ] ジャケット画像: R2 または `public/releases/` へアップロード API
-  - nocffie はローカル filesystem + optimize スクリプト。Cloudflare では R2 推奨
-- [ ] `/admin/discography/` — collabo / my releases タブ
-- [ ] 各行: ジャケット · タイトル · type · date · URL · tracks
-- [ ] 追加 / 削除 / 並び替え（date desc）
+- [x] GitHub Contents API で `discography.json` read/write（links API と同パターン）
+- [x] ジャケット画像: `public/releases/` へ GitHub Contents API でアップロード（R2 未設定のため）
+- [x] `/admin/discography/` — collabo / my releases タブ
+- [x] 各行: ジャケット · タイトル · type · date · URL · tracks
+- [x] 追加 / 削除（公開ページは date desc で表示）
 
 ### Phase 2b — News WYSIWYG
 
-- [ ] 現状: `src/content/news/*.md`（Astro Content Collections）
-- [ ] 目標: Note 風 WYSIWYG（見出し · 本文 · 画像 · 公開日）
-- [ ] 保存先: Markdown 生成 → GitHub commit（frontmatter + body）
-- [ ] 管理 UI: `/admin/news/` — 一覧 · 新規 · 編集
-- [ ] エディタ候補: TipTap / Lexical（軽量）— 画像は R2 URL 挿入
+- [x] 現状: `src/content/news/*.md`（Astro Content Collections）
+- [x] 目標: Note 風 WYSIWYG（見出し · 本文 · 画像 · 公開日）
+- [x] 保存先: Markdown 生成 → GitHub commit（frontmatter + body）
+- [x] 管理 UI: `/admin/news/` — 一覧 · 新規 · 編集
+- [x] エディタ: TipTap。画像挿入は未実装（R2 未設定）
 
 ### Phase 2c — site info
 
@@ -86,4 +85,6 @@ Phase 1（SNS リンク編集）完了後の実装ロードマップ。nocffie �
 | `src/pages/works/index.astro` | 公開 discography ページ |
 | `src/components/DiscographyGrid.astro` | ジャケットグリッド |
 | `functions/api/admin/content/links.ts` | Phase 1 リンク API（テンプレート） |
+| `functions/api/admin/content/discography.ts` | Discography GET/PUT + ジャケット POST |
+| `src/pages/admin/discography/` | Discography 管理 UI |
 | `docs/ADMIN-TODO.md` | 全体 TODO · env 設定 |

@@ -15,7 +15,7 @@ import {
 interface MiddlewareContext {
   request: Request;
   env: PagesEnv;
-  next: (input?: RequestInit | Request) => Promise<Response>;
+  next: (input?: RequestInfo, init?: RequestInit) => Promise<Response>;
 }
 
 async function hasValidSession(request: Request, secret: string | undefined): Promise<boolean> {
@@ -126,9 +126,9 @@ export async function onRequest(context: MiddlewareContext): Promise<Response> {
   if (adminRoute) {
     const loggedIn = await hasValidSession(request, env.SESSION_SECRET?.trim());
     if (!loggedIn) {
-      return next({ request: rewriteRequest(request, "/admin/login/") });
+      return next(rewriteRequest(request, "/admin/login/"));
     }
-    return next({ request: rewriteRequest(request, adminRoute) });
+    return next(rewriteRequest(request, adminRoute));
   }
 
   if (pathname !== "/" && pathname !== "") {
@@ -138,7 +138,7 @@ export async function onRequest(context: MiddlewareContext): Promise<Response> {
   const loggedIn = await hasValidSession(request, env.SESSION_SECRET?.trim());
   const target = loggedIn ? "/admin/" : "/admin/login/";
 
-  return next({ request: rewriteRequest(request, target) });
+  return next(rewriteRequest(request, target));
 }
 
 export { MANAGE_HOST };

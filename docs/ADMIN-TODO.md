@@ -130,19 +130,19 @@ bun run build && bun run pages:dev
 - [x] GitHub Contents API でファイル read/write（`GITHUB_TOKEN` 使用）
 - [x] SNS リンク: `src/data/social-links.json` · `/api/admin/content/links`
 - [x] ニュース: `src/content/news/*.md` · `/api/admin/content/news`（GET 一覧/単体 · POST 作成/更新 · DELETE）
+- [x] ディスコグラフィー: `src/data/discography.json` · `/api/admin/content/discography`（GET/PUT · POST ジャケット）
 - [ ] 編集対象の整理:
   - [ ] `src/data/site.ts`（サイト情報）
-  - [ ] `src/data/discography.json`（ディスコグラフィー）→ [`DISCOGRAPHY-TODO.md`](./DISCOGRAPHY-TODO.md)
-- [ ] バリデーション · 競合検知（SHA） · commit メッセージ（links で部分実装済）
+- [ ] バリデーション · 競合検知（SHA） · commit メッセージ（links / news / discography で部分実装済）
 
 ### Phase C — 管理 UI
 
 - [x] links 編集（`/admin/links/` · manage ホストでは `/links/`）
 - [x] news 一覧 · 新規 · 編集（`/admin/news/` · WYSIWYG · TipTap）
+- [x] discography 編集（`/admin/discography/` · collabo / my releases · ジャケット upload）
 - [ ] ダッシュボードの残りタイル
   - [ ] site info 編集フォーム
-  - [ ] discography 編集
-- [x] 保存 → API → GitHub commit → Pages 再ビルドのフィードバック表示（links · news）
+- [x] 保存 → API → GitHub commit → Pages 再ビルドのフィードバック表示（links · news · discography）
 
 ### Phase D — 運用・セキュリティ（任意）
 
@@ -169,7 +169,9 @@ bun run build && bun run pages:dev
 | `src/pages/admin/login.astro` | ログイン UI |
 | `src/pages/admin/index.astro` | ダッシュボード |
 | `src/pages/admin/news/` | ニュース一覧 · 編集 UI |
+| `src/pages/admin/discography/` | ディスコグラフィー編集 UI |
 | `functions/api/admin/content/news.ts` | ニュース GitHub API |
+| `functions/api/admin/content/discography.ts` | ディスコグラフィー GitHub API |
 | `functions/lib/news.ts` | ニュース Markdown パース/保存 |
 | `functions/api/admin/` | login / session / logout |
 | `functions/_middleware.ts` | manage ホストルーティング |
