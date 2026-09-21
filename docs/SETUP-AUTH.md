@@ -33,10 +33,20 @@ Dashboard → **Workers & Pages** → **`babytato-link`** → **Settings** → *
 |------|----------|
 | **Build command** | `bun run build` |
 | **Build output directory** | `dist` |
-| **Deploy command** | `bun run pages:deploy`（空にできるなら **未設定がおすすめ**） |
+| **Deploy command** | 推奨: **未設定** または **`true`**（下記「wrangler 回避」参照）。wrangler 必須 UI のみ `bun run pages:deploy` |
 
 **Deploy command に `npx wrangler deploy` が入っているとデプロイが失敗します。**  
 `wrangler deploy` は Workers 用です。Pages では `wrangler pages deploy` を使います。
+
+**wrangler 回避（トークン権限エラー時の第一選択）**
+
+Git 連携ビルド（Worker Builds）では、**Build command** 成功後に Cloudflare が `dist/` + `functions/` を自動アップロードする場合があります。Deploy command で wrangler を走らせる必要はありません。
+
+1. Dashboard → **Settings** → **Build** → **Deploy command** を **`true`** に変更（シェルの no-op。コマンドは成功終了するだけ）
+2. **Retry deployment** または main に push
+3. デプロイログでビルド後に `dist` が公開され、`functions/` も有効なら **この構成で運用**（API トークン不要）
+
+Deploy command を空にできる UI なら **未設定** が同等です。`true` は「空にできないが wrangler も使いたくない」場合の回避策です。
 
 `package.json` の `pages:deploy`（ビルド後の deploy 段階）:
 
@@ -57,12 +67,57 @@ Deploy command で wrangler を走らせる場合、**Settings → Environment v
 | `CLOUDFLARE_API_TOKEN` | はい | API トークン（下記「トークン権限」参照） |
 | `CLOUDFLARE_ACCOUNT_ID` | はい（CI） | `4d3287a19985d6acc5d19bacf2178d24` |
 
-**API トークン権限（Deploy command / wrangler 用）**
+### API トークン `babytato-link-pages-deploy`（Deploy command / wrangler 用）
 
-- **Account** → **Cloudflare Pages** → **Edit**
-- **User** → **User Memberships** → **Read**（`wrangler whoami` でアカウント一覧を取るのに必要。無いと auth 成功後に deploy が exit 1 になることがある）
+[Cloudflare Dashboard → My Profile → API Tokens](https://dash.cloudflare.com/profile/api-tokens) → **Create Token** → **Create Custom Token**
+
+| 項目 | 設定値 |
+|------|--------|
+| **Token name** | `babytato-link-pages-deploy` |
+| **Account resources** | **Include** → **Specific account** → 対象アカウント（Account ID `4d3287a19985d6acc5d19bacf2178d24` のアカウント） |
+| **Zone resources** | **All zones** または **All zones from an account**（Pages deploy 単体では Zone 権限は通常不要。カスタムトークン UI で必須なら上記） |
+| **Client IP / TTL** | 任意（未設定で可） |
+
+**Permissions（チェックリスト — すべて必要）**
+
+| Permission group | 権限 | 用途 |
+|------------------|------|------|
+| **Account** | **Cloudflare Pages** → **Edit** | `wrangler pages deploy` — デプロイ作成・アップロード（[Cloudflare CI ドキュメント](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/) の必須権限） |
+| **Account** | **Cloudflare Pages** → **Read** | Edit と別行で出る UI では **Read も付与**（Edit のみテンプレートでも可だが、Read 欠落で API が拒否される報告あり） |
+| **User** | **User Memberships** → **Read** | `wrangler whoami` — アカウント一覧の取得 |
+| **User** | **User Details** → **Read** | Memberships Read の代替（[wrangler 非対話 CI](https://developers.cloudflare.com/workers/wrangler/ci-cd/) ではどちらか一方で可。両方付与が無難） |
+| **Account** | **Account Settings** → **Read** | アカウント解決・検証（[workers-sdk #](https://github.com/cloudflare/workers-sdk/issues) で whoami 成功後 deploy 失敗時の追加権限として言及されることがある） |
+
+**付けない権限（Pages Git デプロイだけなら不要）**
+
+- **Workers Scripts** Edit — Workers 用。Pages デプロイには不要（Deploy command に `wrangler deploy` を入れると別エラーになる）
+- **Account Workers Scripts** 等 — 同上
+
+**Dashboard テンプレートとの違い**
+
+「Edit Cloudflare Workers」テンプレートは **Workers** 向け。Pages 用には上記カスタムトークンを使う。
+
+**環境変数への反映**
+
+1. トークンを再作成したら **値は作成時一度だけ**表示 — リポジトリやチャットに貼らない
+2. Pages プロジェクト → **Settings** → **Environment variables** → Production / Preview 両方の `CLOUDFLARE_API_TOKEN` を **更新** → Save
+3. **Retry deployment**
+
+**ローカル検証（任意）**
+
+```bash
+export CLOUDFLARE_API_TOKEN='（Dashboard で新規作成したトークン）'
+export CLOUDFLARE_ACCOUNT_ID='4d3287a19985d6acc5d19bacf2178d24'
+wrangler whoami          # Super Admin 等が表示されれば User 系 OK
+bun run build && bun run pages:deploy   # Pages API まで通るか確認
+```
 
 > wrangler **4.40** には `pages deploy` 用の `--account-id` フラグは**ありません**。Cloudflare **Pages** の CI では **`CLOUDFLARE_ACCOUNT_ID` 環境変数のみ**（`wrangler.toml` の `account_id` は Pages 設定でサポートされずデプロイが失敗する）。
+
+**プロジェクト名 `babytato-link` について**
+
+- API が **`Authentication error [code: 10000]`**（`/accounts/.../pages/projects/babytato-link`）→ トークンは有効だが **Pages 権限または Account resources のスコープ不足**の可能性が高い。**Not found / Could not find project** ではないので、プロジェクト自体は存在していると考えてよい
+- 念のため Dashboard → **Workers & Pages** でプロジェクト名が **`babytato-link`**（`package.json` の `pages:deploy` と一致）か確認。別名（例: `babytato.link`）なら `--project-name` を合わせる
 
 **wrangler の pages.json キャッシュ**
 
@@ -72,14 +127,6 @@ bun なし環境の Deploy command:
 
 ```text
 rm -rf node_modules/.cache/wrangler 2>/dev/null; npx wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true
-```
-
-**（実験）Git 連携だけで dist が上がる場合**
-
-Deploy command を空にできない UI では、ビルド成果物の自動アップロードに任せる試行として次を使う人もいます（**二重デプロイや挙動差があるため自己責任・要確認**）:
-
-```text
-true
 ```
 
 設定変更後: **Deployments** → 失敗したデプロイ → **Retry deployment**、または main に push。
@@ -241,8 +288,10 @@ bun run pages:dev -- --ip 127.0.0.1 --port 8788
 | ビルド成功後に「Missing entry-point to Worker script」 | Deploy command が `wrangler deploy`（Workers 用）になっていないか → **`bun run pages:deploy` に変更して Retry** |
 | deploy 段階で `CLOUDFLARE_API_TOKEN` / non-interactive | Deploy command 使用時 → 上記 API トークンを Pages 環境変数に設定 |
 | `Could not find project` / アカウントエラー | プロジェクト名が **`babytato-link`** か · Dashboard に `CLOUDFLARE_ACCOUNT_ID=4d3287a19985d6acc5d19bacf2178d24`（`wrangler.toml` に `account_id` を書かない） |
-| auth 成功（whoami）の直後に deploy が exit 1・ログが少ない | トークンに **User Memberships Read** があるか · `rm -rf node_modules/.cache/wrangler` 後に再 deploy · `WRANGLER_LOG=debug`（例: `WRANGLER_LOG=debug bun run pages:deploy`） |
+| **`Authentication error [code: 10000]`** on `/pages/projects/babytato-link` · whoami は成功 | **Pages Edit（+ Read）** がトークンに無い、または **Account resources** が別アカウントのみ · 上記 **`babytato-link-pages-deploy` チェックリスト**で再作成 · 最短回避: Deploy command → **`true`** |
+| auth 成功（whoami）の直後に deploy が exit 1・ログが少ない | トークンに **User Memberships Read**（または **User Details Read**）· **Account Settings Read** · `rm -rf node_modules/.cache/wrangler` 後に再 deploy · `WRANGLER_LOG=debug` |
 | 複数アカウントで CI が非対話エラー | `CLOUDFLARE_ACCOUNT_ID` を必ず設定（上記 ID） |
+| wrangler トークン調整が面倒 | Deploy command を **`true`**（または未設定）にして Git 連携の自動アップロードのみ使う |
 
 ---
 
