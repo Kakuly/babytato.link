@@ -31,6 +31,9 @@ const { links = socialLinks, class: className } = Astro.props;
   .social-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: auto;
+    align-content: start;
+    align-items: start;
     gap: 0.6rem;
     padding: 0.85rem 0.75rem;
   }
@@ -40,7 +43,10 @@ const { links = socialLinks, class: className } = Astro.props;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    align-self: start;
     gap: 0.4rem;
+    width: 100%;
+    height: auto;
     min-height: 4.35rem;
     padding: 0.65rem 0.45rem;
     border: 2px solid var(--line);
@@ -57,15 +63,21 @@ const { links = socialLinks, class: className } = Astro.props;
   .social-grid__icon {
     display: grid;
     place-items: center;
+    flex: none;
     width: 1.35rem;
     height: 1.35rem;
+    aspect-ratio: 1;
   }
 
   .social-grid__icon :global(svg) {
     display: block;
-    width: 100%;
-    height: 100%;
+    width: 1.35rem;
+    height: 1.35rem;
+    aspect-ratio: 1;
+    max-width: 100%;
+    max-height: 100%;
     fill: currentColor;
+    overflow: visible;
   }
 
   .social-grid__label {

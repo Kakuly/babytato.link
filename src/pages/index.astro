@@ -509,11 +509,17 @@ const motto = 'やりたいことを、やりたいだけやる';
     grid-area: links;
     display: grid;
     align-content: start;
+    align-items: start;
   }
 
   .base__links :global(.social-grid) {
+    box-sizing: border-box;
+    width: min(100%, 22.5rem);
+    max-width: 100%;
     padding: 0.85rem 1.15rem 0.35rem;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-self: start;
+    align-self: start;
   }
 
   .base__links :global(.base__bar) {
@@ -647,10 +653,6 @@ const motto = 'やりたいことを、やりたいだけやる';
 
     .base__banner {
       border-right: 0;
-    }
-
-    .base__links :global(.social-grid) {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .base__num {
