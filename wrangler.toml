@@ -10,9 +10,9 @@ name = "babytato-link"
 compatibility_date = "2026-09-21"
 pages_build_output_dir = "./dist"
 
-# Dashboard 右サイドバーの Account ID（CI 非対話では必須級）。CLOUDFLARE_ACCOUNT_ID でも可。
-# wrangler pages deploy に --account-id フラグはない。
-account_id = "4d3287a19985d6acc5d19bacf2178d24"
+# CI 非対話デプロイ: Dashboard → Environment variables に CLOUDFLARE_ACCOUNT_ID を設定（必須級）。
+# Pages プロジェクトの wrangler.toml では account_id は使えない（設定検証エラーになる）。
+# wrangler pages deploy に --account-id フラグもない。
 
 # ADMIN_* / SESSION_SECRET / GITHUB_TOKEN は Dashboard の Environment variables に設定。
 # wrangler.toml や git にシークレットを書かないこと。

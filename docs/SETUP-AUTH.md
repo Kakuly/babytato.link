@@ -62,7 +62,7 @@ Deploy command で wrangler を走らせる場合、**Settings → Environment v
 - **Account** → **Cloudflare Pages** → **Edit**
 - **User** → **User Memberships** → **Read**（`wrangler whoami` でアカウント一覧を取るのに必要。無いと auth 成功後に deploy が exit 1 になることがある）
 
-> wrangler **4.40** には `pages deploy` 用の `--account-id` フラグは**ありません**。アカウントは `CLOUDFLARE_ACCOUNT_ID` 環境変数か `wrangler.toml` の `account_id` で指定します。
+> wrangler **4.40** には `pages deploy` 用の `--account-id` フラグは**ありません**。Cloudflare **Pages** の CI では **`CLOUDFLARE_ACCOUNT_ID` 環境変数のみ**（`wrangler.toml` の `account_id` は Pages 設定でサポートされずデプロイが失敗する）。
 
 **wrangler の pages.json キャッシュ**
 
@@ -240,7 +240,7 @@ bun run pages:dev -- --ip 127.0.0.1 --port 8788
 | `/api/admin/login` が 404 | `functions/` がデプロイされているか · 再デプロイ |
 | ビルド成功後に「Missing entry-point to Worker script」 | Deploy command が `wrangler deploy`（Workers 用）になっていないか → **`bun run pages:deploy` に変更して Retry** |
 | deploy 段階で `CLOUDFLARE_API_TOKEN` / non-interactive | Deploy command 使用時 → 上記 API トークンを Pages 環境変数に設定 |
-| `Could not find project` / アカウントエラー | プロジェクト名が **`babytato-link`** か · `CLOUDFLARE_ACCOUNT_ID=4d3287a19985d6acc5d19bacf2178d24` · `wrangler.toml` の `account_id` |
+| `Could not find project` / アカウントエラー | プロジェクト名が **`babytato-link`** か · Dashboard に `CLOUDFLARE_ACCOUNT_ID=4d3287a19985d6acc5d19bacf2178d24`（`wrangler.toml` に `account_id` を書かない） |
 | auth 成功（whoami）の直後に deploy が exit 1・ログが少ない | トークンに **User Memberships Read** があるか · `rm -rf node_modules/.cache/wrangler` 後に再 deploy · `WRANGLER_LOG=debug`（例: `WRANGLER_LOG=debug bun run pages:deploy`） |
 | 複数アカウントで CI が非対話エラー | `CLOUDFLARE_ACCOUNT_ID` を必ず設定（上記 ID） |
 
