@@ -9,3 +9,5 @@ GITHUB_REPO=kakuly/babytato.link
 GITHUB_BRANCH=main
 # SITE ハブ iframe 用: pages:dev で /admin/login/ へ自動ログイン（127.0.0.1 / localhost のみ）
 DEV_AUTO_LOGIN_USER=kakuly
+# ホームお問い合わせフォーム（Discord / Slack Incoming Webhook）
+CONTACT_WEBHOOK_URL=https://discord.com/api/webhooks/000000000000000000/replace-with-your-webhook-token

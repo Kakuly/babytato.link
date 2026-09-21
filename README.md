@@ -6,7 +6,7 @@ tato の公式サイト。Astro + Markdown で管理。
 
 | パス | 内容 |
 |------|------|
-| `/` | プロフィール、お知らせ、リンク |
+| `/` | プロフィール、お知らせ、SNS、ディスコグラフィー、お問い合わせフォーム |
 | `/works/` | YouTube 動画（自動取得） |
 | `/about/` | プロフィール |
 
@@ -28,6 +28,17 @@ tato の公式サイト。Astro + Markdown で管理。
 
 YouTube に投稿すれば、次回デプロイ時に自動で反映されます。  
 RSS はチャンネルごとに最新 15 本まで。
+
+## お問い合わせ
+
+ホーム下部 `#contact` のフォームは `POST /api/contact`（Cloudflare Pages Function）へ送信します。  
+本番では Pages の **Environment variables** に Incoming Webhook を 1 本設定します。
+
+| 変数 | 内容 |
+|------|------|
+| `CONTACT_WEBHOOK_URL` | Discord または Slack の Incoming Webhook URL |
+
+ローカルは `.dev.vars.example` をコピーした `.dev.vars` に同じ変数を置きます。`astro dev`（`:4322`）からの送信は `pages:dev`（`:8788`）へ転送します。
 
 ## 開発
 

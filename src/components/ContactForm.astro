@@ -1,0 +1,282 @@
+---
+---
+
+<form class="contact-form" id="contact-form" novalidate aria-label="お問い合わせ">
+  <div class="contact-form__field">
+    <label class="contact-form__label" for="contact-name">お名前</label>
+    <input
+      class="contact-form__input"
+      id="contact-name"
+      name="name"
+      type="text"
+      autocomplete="name"
+      required
+      maxlength="120"
+    />
+  </div>
+
+  <div class="contact-form__field">
+    <label class="contact-form__label" for="contact-email">メールアドレス</label>
+    <input
+      class="contact-form__input"
+      id="contact-email"
+      name="email"
+      type="email"
+      autocomplete="email"
+      inputmode="email"
+      required
+      maxlength="254"
+    />
+  </div>
+
+  <div class="contact-form__field">
+    <label class="contact-form__label" for="contact-subject">
+      件名 <span class="contact-form__optional">任意</span>
+    </label>
+    <input
+      class="contact-form__input"
+      id="contact-subject"
+      name="subject"
+      type="text"
+      maxlength="200"
+    />
+  </div>
+
+  <div class="contact-form__field">
+    <label class="contact-form__label" for="contact-message">メッセージ</label>
+    <textarea
+      class="contact-form__textarea"
+      id="contact-message"
+      name="message"
+      rows="6"
+      required
+      minlength="10"
+      maxlength="5000"
+    ></textarea>
+  </div>
+
+  <div class="contact-form__hp" aria-hidden="true">
+    <label for="contact-website">Website</label>
+    <input
+      id="contact-website"
+      name="website"
+      type="text"
+      tabindex="-1"
+      autocomplete="off"
+    />
+  </div>
+
+  <p class="contact-form__status" id="contact-status" role="status" aria-live="polite"></p>
+
+  <button class="contact-form__submit" id="contact-submit" type="submit">送信</button>
+</form>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement | null;
+  const statusEl = document.getElementById('contact-status');
+  const submitBtn = document.getElementById('contact-submit') as HTMLButtonElement | null;
+  const nameInput = document.getElementById('contact-name') as HTMLInputElement | null;
+  const emailInput = document.getElementById('contact-email') as HTMLInputElement | null;
+  const subjectInput = document.getElementById('contact-subject') as HTMLInputElement | null;
+  const messageInput = document.getElementById('contact-message') as HTMLTextAreaElement | null;
+  const websiteInput = document.getElementById('contact-website') as HTMLInputElement | null;
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function contactApiUrl(): string {
+    const { hostname, port } = window.location;
+    if ((hostname === '127.0.0.1' || hostname === 'localhost') && port === '4322') {
+      return 'http://127.0.0.1:8788/api/contact';
+    }
+    return '/api/contact';
+  }
+
+  function cleanField(value: string | null | undefined, maxLen: number): string {
+    return String(value ?? '')
+      .trim()
+      .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, '')
+      .slice(0, maxLen);
+  }
+
+  function setStatus(message: string, kind: 'success' | 'error' | '' = ''): void {
+    if (!statusEl) return;
+    statusEl.textContent = message;
+    statusEl.classList.toggle('is-success', kind === 'success');
+    statusEl.classList.toggle('is-error', kind === 'error');
+  }
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!form || !submitBtn || submitBtn.disabled) return;
+
+    const payload = {
+      name: cleanField(nameInput?.value, 120),
+      email: cleanField(emailInput?.value, 254),
+      subject: cleanField(subjectInput?.value, 200),
+      message: cleanField(messageInput?.value, 5000),
+      website: cleanField(websiteInput?.value, 200),
+    };
+
+    if (!payload.name) {
+      setStatus('お名前を入力してください。', 'error');
+      nameInput?.focus();
+      return;
+    }
+    if (!payload.email) {
+      setStatus('メールアドレスを入力してください。', 'error');
+      emailInput?.focus();
+      return;
+    }
+    if (!EMAIL_RE.test(payload.email)) {
+      setStatus('メールアドレスの形式が正しくありません。', 'error');
+      emailInput?.focus();
+      return;
+    }
+    if (!payload.message) {
+      setStatus('メッセージを入力してください。', 'error');
+      messageInput?.focus();
+      return;
+    }
+    if (payload.message.length < 10) {
+      setStatus('メッセージは10文字以上で入力してください。', 'error');
+      messageInput?.focus();
+      return;
+    }
+
+    submitBtn.disabled = true;
+    setStatus('送信中…');
+
+    try {
+      const response = await fetch(contactApiUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const result = (await response.json().catch(() => ({}))) as {
+        ok?: boolean;
+        message?: string;
+      };
+
+      if (response.ok && result.ok) {
+        setStatus(result.message ?? '送信しました。内容を確認のうえご返信します。', 'success');
+        form.reset();
+        return;
+      }
+
+      if (response.status === 429) {
+        setStatus('送信回数が多すぎます。しばらくしてから再度お試しください。', 'error');
+        return;
+      }
+
+      setStatus(result.message ?? '送信に失敗しました。', 'error');
+    } catch {
+      setStatus('送信に失敗しました。しばらくしてから再度お試しください。', 'error');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+<style>
+  .contact-form {
+    position: relative;
+    display: grid;
+    gap: 1.05rem;
+    max-width: 36rem;
+  }
+
+  .contact-form__field {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .contact-form__label {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .contact-form__optional {
+    margin-left: 0.35rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
+  }
+
+  .contact-form__input,
+  .contact-form__textarea {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    border: 2px solid var(--line);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    appearance: none;
+  }
+
+  .contact-form__textarea {
+    min-height: 9.5rem;
+    resize: vertical;
+  }
+
+  .contact-form__input:focus-visible,
+  .contact-form__textarea:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .contact-form__hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .contact-form__status {
+    min-height: 1.3rem;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .contact-form__status.is-success {
+    color: var(--ink);
+  }
+
+  .contact-form__status.is-error {
+    color: var(--ink);
+  }
+
+  .contact-form__submit {
+    justify-self: start;
+    min-width: 8.5rem;
+    padding: 0.7rem 1.25rem;
+    border: 2px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .contact-form__submit:hover:not(:disabled),
+  .contact-form__submit:focus-visible:not(:disabled) {
+    background: var(--ink);
+    color: var(--void);
+  }
+
+  .contact-form__submit:disabled {
+    opacity: 0.45;
+    cursor: wait;
+  }
+</style>

@@ -26,10 +26,14 @@ const formattedDate = date.toLocaleDateString('ja-JP', {
 </article>
 
 <style>
+  .news-item {
+    padding-bottom: 1.15rem;
+  }
+
   .news-item + .news-item {
     margin-top: 1.15rem;
     padding-top: 1.15rem;
-    border-top: 1px solid rgba(17, 17, 17, 0.2);
+    border-top: 2px solid var(--line);
   }
 
   .title {

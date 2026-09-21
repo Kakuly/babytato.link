@@ -4,6 +4,7 @@ import NewsItem from '../components/NewsItem.astro';
 import { getCollection } from 'astro:content';
 import Barcode from '../components/Barcode.astro';
 import DiscographyGrid from '../components/DiscographyGrid.astro';
+import ContactForm from '../components/ContactForm.astro';
 import SocialLinkGrid from '../components/SocialLinkGrid.astro';
 import VideoCarousel from '../components/VideoCarousel.astro';
 import { site } from '../data/site';
@@ -15,7 +16,6 @@ const newsEntries = (await getCollection('news'))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
 const latestVideos = await getTatoYouTubeVideos(10);
-const newsScrollable = newsEntries.length >= 3;
 const collabo = sortByDateDesc(discography.collabo);
 const myReleases = sortByDateDesc(discography.myReleases);
 
@@ -81,19 +81,29 @@ const motto = 'やりたいことを、やりたいだけやる';
     <section class="base">
       <h2 class="base__banner">{motto}</h2>
       <p class="base__num">729</p>
-      <div class="base__news">
-        <p class="base__label">news</p>
-        <div class:list={['base__news-scroll', { 'base__news-scroll--scrollable': newsScrollable }]}>
-          {
-            newsEntries.map((entry) => (
-              <NewsItem entry={entry} />
-            ))
-          }
-        </div>
-      </div>
       <div class="base__links">
         <SocialLinkGrid />
         <Barcode value="tato official" class="base__bar" />
+      </div>
+    </section>
+
+    <section class="home-block" id="news">
+      <header class="home-block__head">
+        <h2 class="home-block__title">news</h2>
+        <p class="home-block__kicker">updates</p>
+      </header>
+      <div class="home-block__body">
+        {
+          newsEntries.length > 0 ? (
+            <div class="home-news">
+              {newsEntries.map((entry) => (
+                <NewsItem entry={entry} />
+              ))}
+            </div>
+          ) : (
+            <p class="home-news__empty">お知らせはまだありません。</p>
+          )
+        }
       </div>
     </section>
 
@@ -121,11 +131,11 @@ const motto = 'やりたいことを、やりたいだけやる';
     <section class="home-block" id="contact">
       <header class="home-block__head">
         <h2 class="home-block__title">contact</h2>
-        <p class="home-block__kicker">official</p>
+        <p class="home-block__kicker">inquiry</p>
       </header>
       <div class="home-block__body home-contact">
-        <p class="home-block__lead">SNS · official links</p>
-        <SocialLinkGrid />
+        <p class="home-block__lead">お問い合わせは下記フォームよりご連絡ください。</p>
+        <ContactForm />
       </div>
     </section>
   </article>
@@ -449,7 +459,7 @@ const motto = 'やりたいことを、やりたいだけやる';
     grid-template-columns: 1fr auto;
     grid-template-areas:
       'banner num'
-      'news links';
+      'links links';
     gap: 0;
     margin: 0;
     border-top: 2px solid var(--line);
@@ -487,46 +497,15 @@ const motto = 'やりたいことを、やりたいだけやる';
     -webkit-text-stroke: 1.5px var(--ink);
   }
 
-  .base__news {
-    grid-area: news;
-    padding: 1.1rem 1.15rem 1.4rem;
-    border-right: 2px solid var(--line);
-  }
-
-  .base__label {
-    margin: 0 0 0.85rem;
-    color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-  }
-
-  .base__news-scroll--scrollable {
-    max-height: 12.5rem;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) transparent;
-  }
-
-  .base__news-scroll--scrollable::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .base__news-scroll--scrollable::-webkit-scrollbar-thumb {
-    background: var(--line);
-  }
-
   .base__links {
     grid-area: links;
     display: grid;
     align-content: start;
-    min-width: 12.5rem;
   }
 
   .base__links :global(.social-grid) {
-    padding-bottom: 0.35rem;
+    padding: 0.85rem 1.15rem 0.35rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .base__links :global(.base__bar) {
@@ -588,12 +567,12 @@ const motto = 'やりたいことを、やりたいだけやる';
   }
 
   .home-block__lead {
-    margin: 0 0 1rem;
+    margin: 0 0 1.15rem;
     color: var(--muted);
     font-family: var(--font-mono);
     font-size: 0.72rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.7;
   }
 
   .home-disco {
@@ -601,10 +580,10 @@ const motto = 'やりたいことを、やりたいだけやる';
     gap: 2.2rem;
   }
 
-  .home-contact :global(.social-grid) {
-    max-width: 36rem;
-    padding: 0;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .home-news__empty {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
   }
 
   @media (max-width: 720px) {
@@ -635,13 +614,15 @@ const motto = 'やりたいことを、やりたいだけやる';
       grid-template-areas:
         'banner'
         'num'
-        'news'
         'links';
     }
 
-    .base__banner,
-    .base__news {
+    .base__banner {
       border-right: 0;
+    }
+
+    .base__links :global(.social-grid) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .base__num {
@@ -663,10 +644,6 @@ const motto = 'やりたいことを、やりたいだけやる';
 
     .home-block__head {
       grid-template-columns: 1fr;
-    }
-
-    .home-contact :global(.social-grid) {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 

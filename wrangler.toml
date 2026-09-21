@@ -12,6 +12,7 @@ pages_build_output_dir = "./dist"
 # Pages プロジェクトの wrangler.toml では account_id は使えない（設定検証エラーになる）。
 # wrangler pages deploy に --account-id フラグもない。
 
-# ADMIN_* / SESSION_SECRET / GITHUB_TOKEN は Dashboard の Environment variables に設定。
+# ADMIN_* / SESSION_SECRET / GITHUB_TOKEN / CONTACT_WEBHOOK_URL は Dashboard の Environment variables に設定。
 # wrangler.toml や git にシークレットを書かないこと。
 # セットアップ手順: docs/SETUP-AUTH.md
+# お問い合わせ: CONTACT_WEBHOOK_URL（Discord / Slack Incoming Webhook）

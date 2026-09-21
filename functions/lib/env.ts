@@ -15,6 +15,8 @@ export interface PagesEnv {
   SESSION_SECRET?: string;
   /** Local dev only: auto-login username for SITE iframe workflow (127.0.0.1 / localhost). */
   DEV_AUTO_LOGIN_USER?: string;
+  /** Discord / Slack incoming webhook for the public inquiry form. */
+  CONTACT_WEBHOOK_URL?: string;
 }
 
 export function githubRepo(env: PagesEnv): string {
