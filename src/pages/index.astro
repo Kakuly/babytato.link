@@ -252,7 +252,7 @@ const motto = 'やりたいことを、やりたいだけやる';
       translateY(calc(var(--illust-anchor) * (var(--holo-h) - 100%)));
     display: block;
     max-height: var(--holo-h);
-    max-width: none;
+    max-width: 100%;
     width: auto;
     height: auto;
     object-fit: contain;
@@ -264,6 +264,21 @@ const motto = 'やりたいことを、やりたいだけやる';
     mask-size: 100% 100%;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
+  }
+
+  /* Resize-only smoothing — keep open/close on --illust-anchor (see HOLO-COMPOSITING.md) */
+  .holo.is-resizing .holo__illust {
+    transition:
+      max-height var(--holo-close-duration) var(--holo-close-ease),
+      max-width var(--holo-close-duration) var(--holo-close-ease),
+      transform var(--holo-close-duration) var(--holo-close-ease);
+  }
+
+  .holo.is-open.is-resizing .holo__illust {
+    transition:
+      max-height var(--holo-open-duration) var(--holo-open-ease),
+      max-width var(--holo-open-duration) var(--holo-open-ease),
+      transform var(--holo-open-duration) var(--holo-open-ease);
   }
 
   .holo__kicker,
@@ -550,6 +565,7 @@ const motto = 'やりたいことを、やりたいだけやる';
     .holo,
     .holo__scene,
     .holo__illust,
+    .holo.is-resizing .holo__illust,
     .holo__arrow,
     .holo__bio,
     .holo__profile {
@@ -591,6 +607,24 @@ const motto = 'やりたいことを、やりたいだけやる';
 
     var label = btn.querySelector('.visually-hidden');
     var COOLDOWN_MS = 750;
+    var resizeTimer;
+
+    function holoResizeSmoothMs() {
+      var styles = getComputedStyle(holo);
+      var prop = holo.classList.contains('is-open')
+        ? '--holo-open-duration'
+        : '--holo-close-duration';
+      var seconds = parseFloat(styles.getPropertyValue(prop));
+      return (Number.isFinite(seconds) ? seconds : 0.88) * 1000;
+    }
+
+    window.addEventListener('resize', function () {
+      holo.classList.add('is-resizing');
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        holo.classList.remove('is-resizing');
+      }, holoResizeSmoothMs());
+    });
 
     btn.addEventListener('click', function () {
       if (btn.disabled) return;

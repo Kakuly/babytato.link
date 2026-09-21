@@ -1,9 +1,7 @@
 # Cloudflare Pages 用の設定。
 # Astro ビルド後の dist/ を配信します。
 #
-# Git 連携デプロイ: Dashboard の Deploy command → bun run pages:deploy（wrangler deploy は使わない）。
-# Deploy command で wrangler を使う場合は Dashboard の Environment variables に
-# CLOUDFLARE_API_TOKEN（必須）と CLOUDFLARE_ACCOUNT_ID（推奨）を設定すること。
+# Worker Builds: Deploy command = true（ビルドのみ）。本番反映は GitHub Actions → wrangler pages deploy。
 # 手動デプロイ: bun run build && bun run pages:deploy
 # Dashboard → Workers & Pages のプロジェクト名と完全一致させる（例: babytato.link の可能性あり）
 name = "babytato-link"

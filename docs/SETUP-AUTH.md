@@ -25,7 +25,11 @@ nondesu の「おもちゃ箱 admin」と同じ方式: **ユーザー名/パス�
 
 ---
 
-## Cloudflare Pages ビルド設定（デプロイ失敗時は最初に確認）
+## Cloudflare Pages ビルド + GitHub Actions デプロイ
+
+**構成:** Worker Builds = **ビルドのみ** · **本番反映 = GitHub Actions**（`.github/workflows/deploy.yml`）
+
+### Worker Builds（Dashboard — ビルドだけ）
 
 Dashboard → **Workers & Pages** → **`babytato-link`** → **Settings** → **Build**:
 
@@ -33,41 +37,41 @@ Dashboard → **Workers & Pages** → **`babytato-link`** → **Settings** → *
 |------|----------|
 | **Build command** | `bun run build` |
 | **Build output directory** | `dist` |
-| **Deploy command** | 推奨: **未設定** または **`true`**（下記「wrangler 回避」参照）。wrangler 必須 UI のみ `bun run pages:deploy` |
+| **Deploy command** | **`true`** |
+| **Build token** | Dashboard の **Build token** ドロップダウンのみ（Git 連携用） |
+
+**Build 環境変数に `CLOUDFLARE_API_TOKEN` を置かないでください。**
+
+Build env に `CLOUDFLARE_API_TOKEN` があると **Build token を上書き**し、`wrangler whoami` が **left organization** 等のエラーになります。
+
+**Deploy command `true` について**
+
+- **`true`** = シェルの no-op（成功終了するだけ）。Worker Builds 単体では **`dist/` を本番に載せない**
+- これは **意図した設定**。本番反映は下記 **GitHub Actions** が担当
+- Deploy command に `bun run pages:deploy` や `npx wrangler deploy` を入れると、Build env のトークン問題や **Authentication error [code: 10000]** のループになりやすい
 
 **Deploy command に `npx wrangler deploy` が入っているとデプロイが失敗します。**  
 `wrangler deploy` は Workers 用です。Pages では `wrangler pages deploy` を使います。
 
-**wrangler 回避（トークン権限エラー時の第一選択）**
+### GitHub Actions（本番デプロイ）
 
-Git 連携ビルド（Worker Builds）では、**Build command** 成功後に Cloudflare が `dist/` + `functions/` を自動アップロードする場合があります。Deploy command で wrangler を走らせる必要はありません。
+`main` への push で `.github/workflows/deploy.yml` が実行されます:
 
-1. Dashboard → **Settings** → **Build** → **Deploy command** を **`true`** に変更（シェルの no-op。コマンドは成功終了するだけ）
-2. **Retry deployment** または main に push
-3. デプロイログでビルド後に `dist` が公開され、`functions/` も有効なら **この構成で運用**（API トークン不要）
+1. `bun install --frozen-lockfile` → `bun run build`
+2. `cloudflare/wrangler-action@v3` で `pages deploy dist --project-name=babytato-link --branch=main`
 
-Deploy command を空にできる UI なら **未設定** が同等です。`true` は「空にできないが wrangler も使いたくない」場合の回避策です。
+**GitHub リポジトリ Secrets（一度だけ設定 — 下記手順 0）**
 
-`package.json` の `pages:deploy`（ビルド後の deploy 段階）:
+| Secret | 値 |
+|--------|-----|
+| `CLOUDFLARE_API_TOKEN` | Pages Edit 権限の API トークン（下記チェックリスト） |
+| `CLOUDFLARE_ACCOUNT_ID` | `4d3287a19985d6acc5d19bacf2178d24` |
 
-```text
-rm -rf node_modules/.cache/wrangler 2>/dev/null; wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true
-```
+設定場所: GitHub リポジトリ **`kakuly/babytato.link`** → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
 
-**Dashboard → Settings → Build → Deploy command**（bun あり）:
+> Pages Dashboard の **Environment variables** に `CLOUDFLARE_API_TOKEN` を入れる必要はありません（admin 用の `ADMIN_*` / `SESSION_SECRET` 等は従来どおり Pages 側）。
 
-```text
-bun run pages:deploy
-```
-
-Deploy command で wrangler を走らせる場合、**Settings → Environment variables**（Production / Preview）に追加:
-
-| 変数 | 必須 | 内容 |
-|------|------|------|
-| `CLOUDFLARE_API_TOKEN` | はい | API トークン（下記「トークン権限」参照） |
-| `CLOUDFLARE_ACCOUNT_ID` | はい（CI） | `4d3287a19985d6acc5d19bacf2178d24` |
-
-### API トークン `babytato-link-pages-deploy`（Deploy command / wrangler 用）
+### API トークン `babytato-link-pages-deploy`（GitHub Secret / 手動 deploy 用）
 
 [Cloudflare Dashboard → My Profile → API Tokens](https://dash.cloudflare.com/profile/api-tokens) → **Create Token** → **Create Custom Token**
 
@@ -97,11 +101,15 @@ Deploy command で wrangler を走らせる場合、**Settings → Environment v
 
 「Edit Cloudflare Workers」テンプレートは **Workers** 向け。Pages 用には上記カスタムトークンを使う。
 
-**環境変数への反映**
+**GitHub Secrets への反映**
 
 1. トークンを再作成したら **値は作成時一度だけ**表示 — リポジトリやチャットに貼らない
-2. Pages プロジェクト → **Settings** → **Environment variables** → Production / Preview 両方の `CLOUDFLARE_API_TOKEN` を **更新** → Save
-3. **Retry deployment**
+2. GitHub → **`kakuly/babytato.link`** → **Settings** → **Secrets and variables** → **Actions**
+3. **`CLOUDFLARE_API_TOKEN`** を作成または更新（Pages Edit 権限のトークン）
+4. **`CLOUDFLARE_ACCOUNT_ID`** = `4d3287a19985d6acc5d19bacf2178d24`（未設定なら追加）
+5. main に push → **Actions** タブで **Deploy to Cloudflare Pages** が成功するか確認
+
+**Pages Dashboard 側:** Build env に **`CLOUDFLARE_API_TOKEN` が残っていれば削除** · Deploy command = **`true`**
 
 **ローカル検証（任意）**
 
@@ -119,21 +127,30 @@ bun run build && bun run pages:deploy   # Pages API まで通るか確認
 - API が **`Authentication error [code: 10000]`**（`/accounts/.../pages/projects/babytato-link`）→ トークンは有効だが **Pages 権限または Account resources のスコープ不足**の可能性が高い。**Not found / Could not find project** ではないので、プロジェクト自体は存在していると考えてよい
 - 念のため Dashboard → **Workers & Pages** でプロジェクト名が **`babytato-link`**（`package.json` の `pages:deploy` と一致）か確認。別名（例: `babytato.link`）なら `--project-name` を合わせる
 
-**wrangler の pages.json キャッシュ**
-
-CI で別アカウント ID に切り替えたのに古いアカウントが使われる場合、`node_modules/.cache/wrangler` が `CLOUDFLARE_ACCOUNT_ID` を無視することがあります。`pages:deploy` スクリプトはデプロイ前にこのキャッシュを削除します。
-
-bun なし環境の Deploy command:
+`pages:deploy` スクリプト（手動デプロイ用）:
 
 ```text
-rm -rf node_modules/.cache/wrangler 2>/dev/null; npx wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true
+rm -rf node_modules/.cache/wrangler 2>/dev/null; wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true
 ```
 
-設定変更後: **Deployments** → 失敗したデプロイ → **Retry deployment**、または main に push。
+設定変更後: main に push（GitHub Actions が本番反映）· Worker Builds はビルド確認用
 
 ---
 
 ## あなたがやること（順番どおり）
+
+### 0. GitHub Actions 用 Secrets を設定（本番デプロイ — 最初に）
+
+1. [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens) で下記 **`babytato-link-pages-deploy`** チェックリストのトークンを作成
+2. GitHub → **`kakuly/babytato.link`** → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+3. 次の 2 つを追加:
+
+| Secret | 値 |
+|--------|-----|
+| `CLOUDFLARE_API_TOKEN` | 手順 1 の API トークン（Pages Edit） |
+| `CLOUDFLARE_ACCOUNT_ID` | `4d3287a19985d6acc5d19bacf2178d24` |
+
+4. Cloudflare Pages → **`babytato-link`** → **Settings** → **Build** で Deploy command = **`true`** · Build env に **`CLOUDFLARE_API_TOKEN` が無い**ことを確認
 
 ### 1. GitHub Personal Access Token を作成
 
@@ -191,11 +208,12 @@ openssl rand -base64 32
 ```bash
 cd babytatolink
 git add .
-git commit -m "add tato admin login"
+git commit -m "your message"
 git push origin main
 ```
 
-Cloudflare Pages が `bun run build`（または設定済みビルドコマンド）→ `dist/` + `functions/` をデプロイ。
+- **GitHub Actions** が `bun run build` → `wrangler pages deploy` で **`dist/` + `functions/`** を本番反映
+- **Worker Builds** は同じ push で `bun run build` のみ実行（Deploy command **`true`**）
 
 ### 6. manage.babytato.link を Cloudflare に接続
 
@@ -284,14 +302,14 @@ bun run pages:dev -- --ip 127.0.0.1 --port 8788
 | 500「ADMIN_USER_1 … 未設定」 | 4 変数（USER/PASS × 2）が Production に入っているか |
 | 401「ログイン情報が正しくありません」 | ユーザー名の大文字小文字・余分なスペース |
 | ログイン後すぐ落ちる | HTTPS か（本番は OK）。Cookie がブロックされていないか |
-| `/api/admin/login` が 404 | `functions/` がデプロイされているか · 再デプロイ |
-| ビルド成功後に「Missing entry-point to Worker script」 | Deploy command が `wrangler deploy`（Workers 用）になっていないか → **`bun run pages:deploy` に変更して Retry** |
-| deploy 段階で `CLOUDFLARE_API_TOKEN` / non-interactive | Deploy command 使用時 → 上記 API トークンを Pages 環境変数に設定 |
-| `Could not find project` / アカウントエラー | プロジェクト名が **`babytato-link`** か · Dashboard に `CLOUDFLARE_ACCOUNT_ID=4d3287a19985d6acc5d19bacf2178d24`（`wrangler.toml` に `account_id` を書かない） |
-| **`Authentication error [code: 10000]`** on `/pages/projects/babytato-link` · whoami は成功 | **Pages Edit（+ Read）** がトークンに無い、または **Account resources** が別アカウントのみ · 上記 **`babytato-link-pages-deploy` チェックリスト**で再作成 · 最短回避: Deploy command → **`true`** |
-| auth 成功（whoami）の直後に deploy が exit 1・ログが少ない | トークンに **User Memberships Read**（または **User Details Read**）· **Account Settings Read** · `rm -rf node_modules/.cache/wrangler` 後に再 deploy · `WRANGLER_LOG=debug` |
-| 複数アカウントで CI が非対話エラー | `CLOUDFLARE_ACCOUNT_ID` を必ず設定（上記 ID） |
-| wrangler トークン調整が面倒 | Deploy command を **`true`**（または未設定）にして Git 連携の自動アップロードのみ使う |
+| `/api/admin/login` が 404 | `functions/` がデプロイされているか · GitHub Actions deploy が成功しているか |
+| Worker Builds で **left organization** | Build env の **`CLOUDFLARE_API_TOKEN` を削除** · Build token はドロップダウンのみ |
+| ビルド Success だが本番が古いまま | Deploy command = **`true`** のまま **GitHub Actions が失敗**していないか · Secrets 2 つを確認 |
+| GitHub Actions で **Authentication error [code: 10000]** | **`CLOUDFLARE_API_TOKEN`** に **Pages Edit（+ Read）** · Account resources が正しいアカウント · 上記チェックリストで再作成 |
+| ビルド成功後に「Missing entry-point to Worker script」 | Deploy command が `wrangler deploy`（Workers 用）→ **`true`** に戻す |
+| `Could not find project` / アカウントエラー | プロジェクト名が **`babytato-link`** か · Secret **`CLOUDFLARE_ACCOUNT_ID=4d3287a19985d6acc5d19bacf2178d24`** |
+| auth 成功（whoami）の直後に deploy が exit 1 | トークンに **User Memberships Read** 等 · `pages:deploy` 前に `rm -rf node_modules/.cache/wrangler` |
+| 複数アカウントで CI が非対話エラー | GitHub Secret **`CLOUDFLARE_ACCOUNT_ID`** を必ず設定 |
 
 ---
 
@@ -310,3 +328,4 @@ bun run pages:dev -- --ip 127.0.0.1 --port 8788
 | `functions/lib/manage-host.ts` | manage ホスト判定 |
 | `src/lib/admin-paths.ts` | クライアント側の admin URL 解決 |
 | `wrangler.toml` | Pages 設定 |
+| `.github/workflows/deploy.yml` | GitHub Actions 本番デプロイ |
