@@ -1,4 +1,15 @@
 export const NEWS_DIR = "src/content/news";
+export const NEWS_IMAGE_DIR = "public/news";
+export const NEWS_IMAGE_URL_PREFIX = "/news/";
+/** 10MB binary, same cap as discography jackets. */
+export const MAX_NEWS_IMAGE_BYTES = 10 * 1024 * 1024;
+
+const NEWS_IMAGE_MIME: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+};
 
 export interface NewsFrontmatter {
   title: string;
@@ -110,6 +121,41 @@ export function makeNewsSlug(date: string, title: string): string {
 
 export function isValidNewsSlug(slug: string): boolean {
   return SLUG_RE.test(slug);
+}
+
+export function newsImageExtForMime(mime: string): string | null {
+  return NEWS_IMAGE_MIME[mime] ?? null;
+}
+
+export function isAllowedNewsImageMime(mime: string): boolean {
+  return mime in NEWS_IMAGE_MIME;
+}
+
+export function mimeFromNewsImageFile(file: File): string {
+  if (file.type && isAllowedNewsImageMime(file.type)) return file.type;
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".jpg") || name.endsWith(".jpeg")) return "image/jpeg";
+  if (name.endsWith(".png")) return "image/png";
+  if (name.endsWith(".webp")) return "image/webp";
+  if (name.endsWith(".gif")) return "image/gif";
+  return file.type || "";
+}
+
+export function newsImagePrefix(slug?: string): string {
+  const trimmed = slug?.trim() ?? "";
+  return trimmed && isValidNewsSlug(trimmed) ? trimmed : "article";
+}
+
+export function newsImageFilename(prefix: string, hash: string, ext: string): string {
+  return `${prefix}-${hash}.${ext}`;
+}
+
+export function newsImageRepoPath(filename: string): string {
+  return `${NEWS_IMAGE_DIR}/${filename}`;
+}
+
+export function newsImagePublicPath(filename: string): string {
+  return `${NEWS_IMAGE_URL_PREFIX}${filename}`;
 }
 
 export interface NewsInput {

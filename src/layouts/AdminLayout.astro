@@ -2,11 +2,12 @@
 interface Props {
   title?: string;
   showHeader?: boolean;
+  wide?: boolean;
 }
 
 import "../styles/admin.css";
 
-const { title = "tato admin", showHeader = true } = Astro.props;
+const { title = "tato admin", showHeader = true, wide = false } = Astro.props;
 const pageTitle = title === "tato admin" ? title : `${title} | tato admin`;
 ---
 
@@ -22,7 +23,7 @@ const pageTitle = title === "tato admin" ? title : `${title} | tato admin`;
   <body>
     {
       showHeader ? (
-        <div class="admin-shell">
+        <div class:list={["admin-shell", { "admin-shell--wide": wide }]}>
           <header class="admin-header">
             <div class="admin-brand">
               <div class="admin-logo" aria-hidden="true">

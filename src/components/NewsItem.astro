@@ -27,7 +27,11 @@ const formattedDate = date.toLocaleDateString('ja-JP', {
 
 <style>
   .news-item {
+    min-width: 0;
+    max-width: 100%;
     padding-bottom: 1.15rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .news-item + .news-item {
@@ -38,14 +42,37 @@ const formattedDate = date.toLocaleDateString('ja-JP', {
 
   .title {
     margin: 0.25rem 0 0;
+    color: var(--ink);
+    -webkit-text-stroke: 0;
+    font-family: var(--font);
     font-size: 0.95rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .summary {
     margin: 0.4rem 0 0;
     color: var(--muted);
+    font-family: var(--font);
     font-size: 0.82rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .prose {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .prose :global(img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0.75rem 0;
   }
 </style>

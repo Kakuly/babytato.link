@@ -3,13 +3,13 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
 import { adminNewsPath } from "../../../lib/admin-paths";
 ---
 
-<AdminLayout title="news edit">
+<AdminLayout title="news edit" wide>
   <section class="admin-card">
     <p class="admin-back">
       <a href={adminNewsPath()}>← news</a>
     </p>
     <h2 class="admin-card-title" id="news-edit-heading">new article</h2>
-    <p class="admin-hint">タイトル・日付・本文を編集して保存します。本文は WYSIWYG で編集され、Markdown として保存されます。</p>
+    <p class="admin-hint">タイトル・日付・本文を編集して保存します。本文は WYSIWYG で編集され、Markdown として保存されます。画像はエディタへドラッグ＆ドロップ、ペースト、またはツールバーの img から挿入できます（JPEG / PNG / WebP / GIF、10MB まで）。</p>
 
     <form id="news-form" class="admin-grid">
       <div class="admin-field">
@@ -236,6 +236,22 @@ import { adminNewsPath } from "../../../lib/admin-paths";
     }
   }
 
+  async function uploadNewsImage(file: File): Promise<string> {
+    const body = new FormData();
+    body.append("file", file);
+    if (currentSlug) body.append("slug", currentSlug);
+    const response = await fetch("/api/admin/content/news/image", {
+      method: "POST",
+      credentials: "same-origin",
+      body,
+    });
+    const data = (await response.json()) as { ok?: boolean; url?: string; message?: string };
+    if (!response.ok || !data.ok || !data.url) {
+      throw new Error(data.message ?? "画像のアップロードに失敗しました。");
+    }
+    return data.url;
+  }
+
   async function init() {
     try {
       await requireSession();
@@ -243,6 +259,8 @@ import { adminNewsPath } from "../../../lib/admin-paths";
         editor = createNewsEditor({
           element: editorMount,
           toolbar: toolbarMount,
+          uploadImage: uploadNewsImage,
+          onNotice: (message, kind) => showStatus(statusEl, message, kind),
         });
       }
       await loadArticle();
