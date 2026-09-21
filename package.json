@@ -8,7 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "pages:dev": "wrangler pages dev dist --port 8788 --ip 127.0.0.1 --strictPort",
-    "pages:deploy": "rm -rf node_modules/.cache/wrangler 2>/dev/null; wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true --log-level=info",
+    "pages:deploy": "rm -rf node_modules/.cache/wrangler 2>/dev/null; wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true",
     "check": "astro check"
   },
   "dependencies": {

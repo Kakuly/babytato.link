@@ -41,7 +41,7 @@ Dashboard → **Workers & Pages** → **`babytato-link`** → **Settings** → *
 `package.json` の `pages:deploy`（ビルド後の deploy 段階）:
 
 ```text
-rm -rf node_modules/.cache/wrangler 2>/dev/null; wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true --log-level=info
+rm -rf node_modules/.cache/wrangler 2>/dev/null; wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true
 ```
 
 **Dashboard → Settings → Build → Deploy command**（bun あり）:
@@ -71,7 +71,7 @@ CI で別アカウント ID に切り替えたのに古いアカウントが使�
 bun なし環境の Deploy command:
 
 ```text
-rm -rf node_modules/.cache/wrangler 2>/dev/null; npx wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true --log-level=info
+rm -rf node_modules/.cache/wrangler 2>/dev/null; npx wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true
 ```
 
 **（実験）Git 連携だけで dist が上がる場合**
@@ -241,7 +241,7 @@ bun run pages:dev -- --ip 127.0.0.1 --port 8788
 | ビルド成功後に「Missing entry-point to Worker script」 | Deploy command が `wrangler deploy`（Workers 用）になっていないか → **`bun run pages:deploy` に変更して Retry** |
 | deploy 段階で `CLOUDFLARE_API_TOKEN` / non-interactive | Deploy command 使用時 → 上記 API トークンを Pages 環境変数に設定 |
 | `Could not find project` / アカウントエラー | プロジェクト名が **`babytato-link`** か · `CLOUDFLARE_ACCOUNT_ID=4d3287a19985d6acc5d19bacf2178d24` · `wrangler.toml` の `account_id` |
-| auth 成功（whoami）の直後に deploy が exit 1・ログが少ない | トークンに **User Memberships Read** があるか · `rm -rf node_modules/.cache/wrangler` 後に再 deploy · `--log-level=info` |
+| auth 成功（whoami）の直後に deploy が exit 1・ログが少ない | トークンに **User Memberships Read** があるか · `rm -rf node_modules/.cache/wrangler` 後に再 deploy · `WRANGLER_LOG=debug`（例: `WRANGLER_LOG=debug bun run pages:deploy`） |
 | 複数アカウントで CI が非対話エラー | `CLOUDFLARE_ACCOUNT_ID` を必ず設定（上記 ID） |
 
 ---
