@@ -24,15 +24,17 @@ const { entries, emptyMessage = 'リリースはまだありません。' } = As
 
         return (
           <Tag class="discography-grid__item" {...linkProps} title={entry.title}>
-            <img
-              class="discography-grid__img"
-              src={entry.img}
-              alt={entry.title}
-              width="480"
-              height="480"
-              loading="lazy"
-              decoding="async"
-            />
+            <span class="discography-grid__art">
+              <img
+                class="discography-grid__img"
+                src={entry.img}
+                alt={entry.title}
+                width="480"
+                height="480"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
             <span class="discography-grid__meta">
               <span class="discography-grid__title">{entry.title}</span>
               {entry.date ? <span class="discography-grid__date">{entry.date}</span> : null}
@@ -45,6 +47,48 @@ const { entries, emptyMessage = 'リリースはまだありません。' } = As
     <p class="discography-empty">{emptyMessage}</p>
   )
 }
+
+{
+  entries.length > 0 ? (
+    <noscript>
+      <style>
+        .discography-grid__img {
+          filter: none;
+          transform: none;
+          opacity: 1;
+        }
+      </style>
+    </noscript>
+  ) : null
+}
+
+<script>
+  function markJacketReady(img: HTMLImageElement) {
+    img.classList.add('is-ready');
+  }
+
+  function revealJacket(img: HTMLImageElement) {
+    if (typeof img.decode === 'function') {
+      void img.decode().then(() => markJacketReady(img)).catch(() => markJacketReady(img));
+      return;
+    }
+    markJacketReady(img);
+  }
+
+  function armJacket(img: HTMLImageElement) {
+    if (img.classList.contains('is-ready')) return;
+
+    if (img.complete && img.naturalWidth > 0) {
+      revealJacket(img);
+      return;
+    }
+
+    img.addEventListener('load', () => revealJacket(img), { once: true });
+    img.addEventListener('error', () => markJacketReady(img), { once: true });
+  }
+
+  document.querySelectorAll<HTMLImageElement>('.discography-grid__img').forEach(armJacket);
+</script>
 
 <style>
   .discography-grid {
@@ -64,13 +108,35 @@ const { entries, emptyMessage = 'リリースはまだありません。' } = As
     text-decoration: none;
   }
 
-  .discography-grid__img {
+  .discography-grid__art {
     display: block;
     width: 100%;
     aspect-ratio: 1;
-    object-fit: cover;
+    overflow: hidden;
     border: 2px solid var(--line);
     background: var(--void);
+    contain: paint;
+  }
+
+  .discography-grid__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    filter: blur(28px) saturate(1.05);
+    transform: scale(1.14);
+    opacity: 0.92;
+    transition:
+      filter 0.45s ease,
+      transform 0.45s ease,
+      opacity 0.4s ease;
+  }
+
+  .discography-grid__img.is-ready {
+    filter: none;
+    transform: none;
+    opacity: 1;
   }
 
   .discography-grid__meta {
@@ -94,5 +160,14 @@ const { entries, emptyMessage = 'リリースはまだありません。' } = As
     margin: 0;
     color: var(--muted);
     font-size: 0.92rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .discography-grid__img {
+      filter: none;
+      transform: none;
+      opacity: 1;
+      transition: none;
+    }
   }
 </style>
