@@ -129,20 +129,20 @@ bun run build && bun run pages:dev
 
 - [x] GitHub Contents API でファイル read/write（`GITHUB_TOKEN` 使用）
 - [x] SNS リンク: `src/data/social-links.json` · `/api/admin/content/links`
+- [x] ニュース: `src/content/news/*.md` · `/api/admin/content/news`（GET 一覧/単体 · POST 作成/更新 · DELETE）
 - [ ] 編集対象の整理:
   - [ ] `src/data/site.ts`（サイト情報）
   - [ ] `src/data/discography.json`（ディスコグラフィー）→ [`DISCOGRAPHY-TODO.md`](./DISCOGRAPHY-TODO.md)
-  - [ ] `src/content/news/*.md`（ニュース）
 - [ ] バリデーション · 競合検知（SHA） · commit メッセージ（links で部分実装済）
 
 ### Phase C — 管理 UI
 
 - [x] links 編集（`/admin/links/` · manage ホストでは `/links/`）
+- [x] news 一覧 · 新規 · 編集（`/admin/news/` · WYSIWYG · TipTap）
 - [ ] ダッシュボードの残りタイル
   - [ ] site info 編集フォーム
-  - [ ] news 一覧 · 新規 · 編集（WYSIWYG）
   - [ ] discography 編集
-- [x] 保存 → API → GitHub commit → Pages 再ビルドのフィードバック表示（links）
+- [x] 保存 → API → GitHub commit → Pages 再ビルドのフィードバック表示（links · news）
 
 ### Phase D — 運用・セキュリティ（任意）
 
@@ -168,6 +168,9 @@ bun run build && bun run pages:dev
 |----------|------|
 | `src/pages/admin/login.astro` | ログイン UI |
 | `src/pages/admin/index.astro` | ダッシュボード |
+| `src/pages/admin/news/` | ニュース一覧 · 編集 UI |
+| `functions/api/admin/content/news.ts` | ニュース GitHub API |
+| `functions/lib/news.ts` | ニュース Markdown パース/保存 |
 | `functions/api/admin/` | login / session / logout |
 | `functions/_middleware.ts` | manage ホストルーティング |
 | `functions/lib/admin-users.ts` | アカウント照合 |

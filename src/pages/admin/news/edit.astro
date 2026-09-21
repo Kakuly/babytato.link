@@ -1,0 +1,276 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { adminNewsPath } from "../../../lib/admin-paths";
+---
+
+<AdminLayout title="news edit">
+  <section class="admin-card">
+    <p class="admin-back">
+      <a href={adminNewsPath()}>← news</a>
+    </p>
+    <h2 class="admin-card-title" id="news-edit-heading">new article</h2>
+    <p class="admin-hint">タイトル・日付・本文を編集して保存します。本文は WYSIWYG で編集され、Markdown として保存されます。</p>
+
+    <form id="news-form" class="admin-grid">
+      <div class="admin-field">
+        <label for="news-title">title</label>
+        <input id="news-title" name="title" type="text" required autocomplete="off" />
+      </div>
+
+      <div class="admin-field">
+        <label for="news-date">date</label>
+        <input id="news-date" name="date" type="date" required />
+      </div>
+
+      <div class="admin-field">
+        <label for="news-summary">summary</label>
+        <input id="news-summary" name="summary" type="text" autocomplete="off" />
+      </div>
+
+      <div class="admin-field admin-field--checkbox">
+        <label for="news-draft">
+          <input id="news-draft" name="draft" type="checkbox" />
+          draft（公開サイトに表示しない）
+        </label>
+      </div>
+
+      <div class="admin-field">
+        <span class="admin-field-label">body</span>
+        <div class="admin-editor">
+          <div id="news-toolbar" class="admin-editor-toolbar"></div>
+          <div id="news-editor" class="admin-editor-body"></div>
+        </div>
+      </div>
+
+      <div class="admin-actions">
+        <button type="submit" class="admin-btn admin-btn-primary" id="news-save">save</button>
+        <button type="button" class="admin-btn" id="news-reload">reload</button>
+        <button type="button" class="admin-btn admin-btn-danger" id="news-delete" hidden>delete</button>
+      </div>
+    </form>
+
+    <p id="news-status" class="admin-status" aria-live="polite"></p>
+  </section>
+</AdminLayout>
+
+<script>
+  import { requireSession, showStatus } from "../../../scripts/admin/client";
+  import {
+    createNewsEditor,
+    getEditorMarkdown,
+    setEditorMarkdown,
+  } from "../../../scripts/admin/news-editor";
+  import { adminNewsPath } from "../../../lib/admin-paths";
+  import type { Editor } from "@tiptap/core";
+
+  type NewsArticle = {
+    slug: string;
+    title: string;
+    date: string;
+    summary?: string;
+    draft?: boolean;
+    body: string;
+    sha: string;
+  };
+
+  const form = document.getElementById("news-form") as HTMLFormElement | null;
+  const statusEl = document.getElementById("news-status");
+  const saveBtn = document.getElementById("news-save") as HTMLButtonElement | null;
+  const reloadBtn = document.getElementById("news-reload");
+  const deleteBtn = document.getElementById("news-delete") as HTMLButtonElement | null;
+  const headingEl = document.getElementById("news-edit-heading");
+  const titleInput = document.getElementById("news-title") as HTMLInputElement | null;
+  const dateInput = document.getElementById("news-date") as HTMLInputElement | null;
+  const summaryInput = document.getElementById("news-summary") as HTMLInputElement | null;
+  const draftInput = document.getElementById("news-draft") as HTMLInputElement | null;
+  const editorMount = document.getElementById("news-editor");
+  const toolbarMount = document.getElementById("news-toolbar");
+
+  const params = new URLSearchParams(window.location.search);
+  let currentSlug = params.get("slug")?.trim() ?? "";
+  let fileSha = "";
+  let editor: Editor | null = null;
+
+  function setLoading(loading: boolean) {
+    if (saveBtn) saveBtn.disabled = loading;
+    if (reloadBtn instanceof HTMLButtonElement) reloadBtn.disabled = loading;
+    if (deleteBtn) deleteBtn.disabled = loading;
+  }
+
+  function fillForm(article: Partial<NewsArticle>) {
+    if (titleInput && article.title) titleInput.value = article.title;
+    if (dateInput && article.date) dateInput.value = article.date;
+    if (summaryInput) summaryInput.value = article.summary ?? "";
+    if (draftInput) draftInput.checked = article.draft === true;
+    if (editor && typeof article.body === "string") {
+      setEditorMarkdown(editor, article.body);
+    }
+  }
+
+  function defaultDate(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  async function loadArticle() {
+    if (!currentSlug) {
+      if (dateInput) dateInput.value = defaultDate();
+      if (deleteBtn) deleteBtn.hidden = true;
+      if (headingEl) headingEl.textContent = "new article";
+      return;
+    }
+
+    setLoading(true);
+    showStatus(statusEl, "読み込み中…", "success");
+    statusEl?.classList.add("is-visible");
+
+    try {
+      const response = await fetch(`/api/admin/content/news?slug=${encodeURIComponent(currentSlug)}`, {
+        credentials: "same-origin",
+      });
+      const data = (await response.json()) as {
+        ok: boolean;
+        article?: NewsArticle;
+        message?: string;
+      };
+
+      if (!response.ok || !data.ok || !data.article) {
+        throw new Error(data.message ?? "読み込みに失敗しました。");
+      }
+
+      fileSha = data.article.sha ?? "";
+      fillForm(data.article);
+      if (deleteBtn) deleteBtn.hidden = false;
+      if (headingEl) headingEl.textContent = "edit article";
+      showStatus(statusEl, "読み込み完了", "success");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "読み込みに失敗しました。";
+      showStatus(statusEl, message, "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function saveArticle(event: Event) {
+    event.preventDefault();
+    if (!form || !editor) return;
+
+    setLoading(true);
+    showStatus(statusEl, "保存中…", "success");
+    statusEl?.classList.add("is-visible");
+
+    const payload = {
+      slug: currentSlug || undefined,
+      title: titleInput?.value.trim() ?? "",
+      date: dateInput?.value ?? "",
+      summary: summaryInput?.value.trim() ?? "",
+      draft: draftInput?.checked === true,
+      body: getEditorMarkdown(editor),
+      sha: fileSha || undefined,
+    };
+
+    try {
+      const response = await fetch("/api/admin/content/news", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = (await response.json()) as {
+        ok: boolean;
+        article?: NewsArticle;
+        message?: string;
+      };
+
+      if (!response.ok || !data.ok || !data.article) {
+        throw new Error(data.message ?? "保存に失敗しました。");
+      }
+
+      fileSha = data.article.sha ?? fileSha;
+      if (!currentSlug && data.article.slug) {
+        currentSlug = data.article.slug;
+        const next = new URL(window.location.href);
+        next.searchParams.set("slug", data.article.slug);
+        window.history.replaceState({}, "", next);
+      }
+      if (deleteBtn) deleteBtn.hidden = false;
+      if (headingEl) headingEl.textContent = "edit article";
+      showStatus(statusEl, data.message ?? "保存しました。", "success");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "保存に失敗しました。";
+      showStatus(statusEl, message, "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function deleteArticle() {
+    if (!currentSlug) return;
+    if (!window.confirm(`「${titleInput?.value || currentSlug}」を削除しますか？`)) return;
+
+    setLoading(true);
+    showStatus(statusEl, "削除中…", "success");
+    statusEl?.classList.add("is-visible");
+
+    try {
+      const response = await fetch("/api/admin/content/news", {
+        method: "DELETE",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: currentSlug, sha: fileSha || undefined }),
+      });
+      const data = (await response.json()) as { ok: boolean; message?: string };
+
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message ?? "削除に失敗しました。");
+      }
+
+      window.location.href = adminNewsPath();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "削除に失敗しました。";
+      showStatus(statusEl, message, "error");
+      setLoading(false);
+    }
+  }
+
+  async function init() {
+    try {
+      await requireSession();
+      if (editorMount && toolbarMount) {
+        editor = createNewsEditor({
+          element: editorMount,
+          toolbar: toolbarMount,
+        });
+      }
+      await loadArticle();
+      form?.addEventListener("submit", saveArticle);
+      reloadBtn?.addEventListener("click", () => {
+        loadArticle().catch(() => undefined);
+      });
+      deleteBtn?.addEventListener("click", () => {
+        deleteArticle().catch(() => undefined);
+      });
+    } catch {
+      // redirect handled in requireSession
+    }
+  }
+
+  init();
+</script>
+
+<style>
+  .admin-back {
+    margin: 0 0 var(--space-2);
+    font-size: 0.88rem;
+  }
+
+  .admin-field-label {
+    font-size: 0.78rem;
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+</style>

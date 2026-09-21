@@ -1,6 +1,6 @@
 ---
 import AdminLayout from "../../layouts/AdminLayout.astro";
-import { adminLinksPath } from "../../lib/admin-paths";
+import { adminLinksPath, adminNewsPath } from "../../lib/admin-paths";
 ---
 
 <AdminLayout>
@@ -21,10 +21,10 @@ import { adminLinksPath } from "../../lib/admin-paths";
         </span>
       </li>
       <li>
-        <span class="admin-nav-tile" aria-disabled="true">
+        <a class="admin-nav-tile" href={adminNewsPath()}>
           <span class="admin-nav-tile__label">news</span>
-          <span class="admin-nav-tile__hint">coming soon</span>
-        </span>
+          <span class="admin-nav-tile__hint">お知らせ</span>
+        </a>
       </li>
       <li>
         <a class="admin-nav-tile" href={adminLinksPath()}>
@@ -42,7 +42,7 @@ import { adminLinksPath } from "../../lib/admin-paths";
 
   <section class="admin-card">
     <p class="admin-coming-soon">
-      news · site info · discography の編集 UI は Phase 2 以降で追加予定です。
+      site info · discography の編集 UI は Phase 2 以降で追加予定です。
     </p>
   </section>
 </AdminLayout>
