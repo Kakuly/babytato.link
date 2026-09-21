@@ -3,11 +3,12 @@ import { site } from '../data/site';
 
 const navItems = [
   { href: '/', label: 'HOME' },
-  { href: '/works/', label: 'DISCOGRAPHY' },
-  { href: '/about/', label: 'CONTACT' },
+  { href: '/#discography', label: 'DISCOGRAPHY' },
+  { href: '/#contact', label: 'CONTACT' },
 ];
 
 const currentPath = Astro.url.pathname;
+const isPublicHome = currentPath === '/' || currentPath === '';
 ---
 
 <header class="header">
@@ -16,12 +17,13 @@ const currentPath = Astro.url.pathname;
     <nav class="nav" aria-label="メインナビゲーション">
       {
         navItems.map((item) => {
-          const isActive =
-            item.href === '/'
-              ? currentPath === '/'
-              : currentPath.startsWith(item.href);
+          const isActive = isPublicHome && item.href === '/';
           return (
-            <a class:list={['nav__link', { 'nav__link--active': isActive }]} href={item.href}>
+            <a
+              class:list={['nav__link', { 'nav__link--active': isActive }]}
+              href={item.href}
+              data-nav-hash={item.href.startsWith('/#') ? item.href.slice(2) : ''}
+            >
               {item.label}
             </a>
           );
@@ -30,6 +32,25 @@ const currentPath = Astro.url.pathname;
     </nav>
   </div>
 </header>
+
+<script is:inline>
+  (function () {
+    var links = document.querySelectorAll('.nav__link');
+    if (!links.length) return;
+
+    function syncNav() {
+      var hash = (window.location.hash || '').replace(/^#/, '');
+      links.forEach(function (link) {
+        var target = link.getAttribute('data-nav-hash') || '';
+        var active = hash ? target === hash : !target;
+        link.classList.toggle('nav__link--active', active);
+      });
+    }
+
+    syncNav();
+    window.addEventListener('hashchange', syncNav);
+  })();
+</script>
 
 <style>
   .header {

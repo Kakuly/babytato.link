@@ -3,9 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsItem from '../components/NewsItem.astro';
 import { getCollection } from 'astro:content';
 import Barcode from '../components/Barcode.astro';
+import DiscographyGrid from '../components/DiscographyGrid.astro';
 import SocialLinkGrid from '../components/SocialLinkGrid.astro';
 import VideoCarousel from '../components/VideoCarousel.astro';
 import { site } from '../data/site';
+import { discography, sortByDateDesc } from '../lib/discography';
 import { getTatoYouTubeVideos } from '../lib/youtube';
 
 const newsEntries = (await getCollection('news'))
@@ -14,6 +16,8 @@ const newsEntries = (await getCollection('news'))
 
 const latestVideos = await getTatoYouTubeVideos(10);
 const newsScrollable = newsEntries.length >= 3;
+const collabo = sortByDateDesc(discography.collabo);
+const myReleases = sortByDateDesc(discography.myReleases);
 
 const motto = 'やりたいことを、やりたいだけやる';
 ---
@@ -94,6 +98,36 @@ const motto = 'やりたいことを、やりたいだけやる';
     </section>
 
     {latestVideos.length > 0 && <VideoCarousel videos={latestVideos} />}
+
+    <section class="home-block" id="discography">
+      <header class="home-block__head">
+        <h2 class="home-block__title">discography</h2>
+        <p class="home-block__kicker">releases</p>
+      </header>
+      <div class="home-block__body">
+        <div class="home-disco">
+          <section class="home-disco__section">
+            <h3 class="home-block__label">collabo</h3>
+            <DiscographyGrid entries={collabo} emptyMessage="コラボリリースはまだありません。" />
+          </section>
+          <section class="home-disco__section">
+            <h3 class="home-block__label">my releases</h3>
+            <DiscographyGrid entries={myReleases} emptyMessage="ソロリリースはまだありません。" />
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-block" id="contact">
+      <header class="home-block__head">
+        <h2 class="home-block__title">contact</h2>
+        <p class="home-block__kicker">official</p>
+      </header>
+      <div class="home-block__body home-contact">
+        <p class="home-block__lead">SNS · official links</p>
+        <SocialLinkGrid />
+      </div>
+    </section>
   </article>
 </BaseLayout>
 
@@ -502,6 +536,77 @@ const motto = 'やりたいことを、やりたいだけやる';
     color: var(--ink);
   }
 
+  .home-block {
+    scroll-margin-top: 0.75rem;
+    margin: 0;
+    border-top: 2px solid var(--line);
+  }
+
+  .home-block__head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    border-bottom: 2px solid var(--line);
+  }
+
+  .home-block__title {
+    margin: 0;
+    padding: 0.9rem 1.15rem 0.75rem;
+    border-right: 2px solid var(--line);
+    font-family: var(--font);
+    font-size: clamp(1.15rem, 3.4vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    line-height: 1.2;
+    color: transparent;
+    -webkit-text-stroke: 1.15px var(--ink);
+  }
+
+  .home-block__kicker {
+    display: grid;
+    place-items: center;
+    margin: 0;
+    min-width: 7.5rem;
+    padding: 0.4rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .home-block__body {
+    padding: 1.25rem 1.15rem 1.7rem;
+  }
+
+  .home-block__label {
+    margin: 0 0 0.85rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+
+  .home-block__lead {
+    margin: 0 0 1rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .home-disco {
+    display: grid;
+    gap: 2.2rem;
+  }
+
+  .home-contact :global(.social-grid) {
+    max-width: 36rem;
+    padding: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   @media (max-width: 720px) {
     .holo {
       --holo-h: 28rem;
@@ -543,6 +648,25 @@ const motto = 'やりたいことを、やりたいだけやる';
       min-width: 0;
       justify-items: start;
       padding-left: 1.15rem;
+    }
+
+    .home-block__title {
+      border-right: 0;
+    }
+
+    .home-block__kicker {
+      min-width: 0;
+      justify-items: start;
+      padding-left: 1.15rem;
+      border-top: 2px solid var(--line);
+    }
+
+    .home-block__head {
+      grid-template-columns: 1fr;
+    }
+
+    .home-contact :global(.social-grid) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 

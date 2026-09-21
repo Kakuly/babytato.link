@@ -5,6 +5,11 @@ const year = new Date().getFullYear();
 
 <footer class="footer">
   <p>&copy; {year} {site.name}</p>
+  <nav class="footer__nav" aria-label="フッター">
+    <a href="/">home</a>
+    <a href="/#discography">discography</a>
+    <a href="/#contact">contact</a>
+  </nav>
   <p class="footer__code">729</p>
 </footer>
 
@@ -24,6 +29,23 @@ const year = new Date().getFullYear();
 
   .footer p {
     margin: 0;
+  }
+
+  .footer__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+
+  .footer__nav a {
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .footer__nav a:hover {
+    color: var(--ink);
+    text-decoration: none;
   }
 
   .footer__code {
