@@ -25,9 +25,12 @@
 
 ```bash
 bun install
-bun run dev          # :4322（package.json + astro.config で固定・strictPort）
-bun run pages:dev    # :8788 @ 127.0.0.1（Functions / admin）
+bun run site:dev     # SITE tato プレビュー（News 含む）推奨: build → :8788 + :4322
+bun run dev          # :4322 のみ（package.json + astro.config で固定・strictPort）
+bun run pages:dev    # :8788 @ 127.0.0.1（Functions / admin）※要 dist
 ```
+
+SITE → **tato** でお知らせ（`GET /api/news`）まで見るときは `bun run site:dev`。Astro の `/api` は既存 Vite proxy で `:8788` へ転送される。Studio / SITE ハブの自動起動はしない（Kakuly.github.io 側）。
 
 ### ポート割り当て（nondesu と被らせない）
 

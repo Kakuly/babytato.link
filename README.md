@@ -38,7 +38,7 @@ RSS はチャンネルごとに最新 15 本まで。
 |------|------|
 | `CONTACT_WEBHOOK_URL` | Discord または Slack の Incoming Webhook URL |
 
-ローカルは `.dev.vars.example` をコピーした `.dev.vars` に同じ変数を置きます。`astro dev`（`:4322`）の `/api/*` は Vite proxy で `pages:dev`（`:8788`）へ転送するので、**両方起動**してください。
+ローカルは `.dev.vars.example` をコピーした `.dev.vars` に同じ変数を置きます。`astro dev`（`:4322`）の `/api/*` は Vite proxy で `pages:dev`（`:8788`）へ転送するので、**両方起動**してください（推奨: `bun run site:dev`）。
 
 ## お知らせ（即時公開）
 
@@ -50,9 +50,12 @@ RSS はチャンネルごとに最新 15 本まで。
 
 ```bash
 bun install
-bun run dev          # http://127.0.0.1:4322 （strictPort）
+bun run site:dev     # 推奨: build → pages:dev :8788 + Astro :4322（SITE tato / News）
+bun run dev          # http://127.0.0.1:4322 のみ（strictPort）
 bun run build && bun run pages:dev   # http://127.0.0.1:8788 （admin / Functions）
 ```
+
+SITE の tato プレビューでお知らせ API まで使うときは `bun run site:dev`（Ctrl+C で両方停止）。
 
 ### ローカルポート（nondesu と分離）
 

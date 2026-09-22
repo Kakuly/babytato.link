@@ -9,6 +9,7 @@
     "preview": "astro preview",
     "pages:dev": "PATH=\"/Users/kakuly/.local/node-v22.19.0-darwin-arm64/bin:$PATH\" wrangler pages dev dist --port 8788 --ip 127.0.0.1",
     "pages:deploy": "rm -rf node_modules/.cache/wrangler 2>/dev/null; wrangler pages deploy dist --project-name=babytato-link --branch=main --commit-dirty=true",
+    "site:dev": "bash scripts/site-dev.sh",
     "check": "astro check"
   },
   "dependencies": {
