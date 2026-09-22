@@ -101,12 +101,12 @@ const motto = 'やりたいことを、やりたいだけやる';
       <div class="home-block__body">
         <div class="home-disco">
           <section class="home-disco__section">
-            <h3 class="home-block__label">collabo</h3>
-            <DiscographyGrid entries={collabo} emptyMessage="コラボリリースはまだありません。" />
-          </section>
-          <section class="home-disco__section">
             <h3 class="home-block__label">my releases</h3>
             <DiscographyGrid entries={myReleases} emptyMessage="ソロリリースはまだありません。" />
+          </section>
+          <section class="home-disco__section">
+            <h3 class="home-block__label">collabo</h3>
+            <DiscographyGrid entries={collabo} emptyMessage="コラボリリースはまだありません。" />
           </section>
         </div>
       </div>
@@ -638,11 +638,21 @@ const motto = 'やりたいことを、やりたいだけやる';
 
   .home-disco {
     display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 2.2rem;
+    min-width: 0;
+    align-items: start;
+  }
+
+  .home-disco__section {
     min-width: 0;
   }
 
   @media (max-width: 720px) {
+    .home-disco {
+      grid-template-columns: 1fr;
+    }
+
     .holo {
       --holo-h: 28rem;
     }
