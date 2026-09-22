@@ -178,6 +178,15 @@ h3 {
   padding: 0.55rem;
 }
 
+.admin-back {
+  margin: 0 0 var(--space-2);
+}
+
+.admin-back .admin-btn {
+  display: inline-block;
+  text-decoration: none;
+}
+
 .admin-actions {
   display: flex;
   flex-wrap: wrap;

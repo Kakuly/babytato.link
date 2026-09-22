@@ -6,7 +6,7 @@ import { adminDashboardPath } from "../../../lib/admin-paths";
 <AdminLayout title="links">
   <section class="admin-card">
     <p class="admin-back">
-      <a href={adminDashboardPath()}>← dashboard</a>
+      <a class="admin-btn" href={adminDashboardPath()}>←戻る</a>
     </p>
     <h2 class="admin-card-title">SNS links</h2>
     <p class="admin-hint">公開サイトの SNS リンクを編集します。未設定の場合は <code>#</code> を入力してください。</p>
@@ -164,11 +164,6 @@ import { adminDashboardPath } from "../../../lib/admin-paths";
 </script>
 
 <style>
-  .admin-back {
-    margin: 0 0 var(--space-2);
-    font-size: 0.88rem;
-  }
-
   .admin-hint code {
     font-family: var(--font-mono);
     font-size: 0.85em;

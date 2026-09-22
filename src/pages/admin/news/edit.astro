@@ -6,7 +6,7 @@ import { adminNewsPath } from "../../../lib/admin-paths";
 <AdminLayout title="news edit" wide>
   <section class="admin-card">
     <p class="admin-back">
-      <a href={adminNewsPath()}>← news</a>
+      <a class="admin-btn" href={adminNewsPath()}>←戻る</a>
     </p>
     <h2 class="admin-card-title" id="news-edit-heading">new article</h2>
     <p class="admin-hint">タイトル・日付・本文を編集して保存します。本文は WYSIWYG で編集され、D1 に Markdown として保存されます（公開は下書きオフで即時）。画像はドラッグ＆ドロップ、ペースト、またはツールバーの img（JPEG / PNG / WebP / GIF、10MB まで）。R2 があれば即時表示、未接続時は GitHub 経由で再ビルド後に表示されます。</p>
@@ -280,11 +280,6 @@ import { adminNewsPath } from "../../../lib/admin-paths";
 </script>
 
 <style>
-  .admin-back {
-    margin: 0 0 var(--space-2);
-    font-size: 0.88rem;
-  }
-
   .admin-field-label {
     font-size: 0.78rem;
     font-family: var(--font-mono);

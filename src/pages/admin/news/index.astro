@@ -6,7 +6,7 @@ import { adminDashboardPath, adminNewsEditPath } from "../../../lib/admin-paths"
 <AdminLayout title="news">
   <section class="admin-card">
     <p class="admin-back">
-      <a href={adminDashboardPath()}>← dashboard</a>
+      <a class="admin-btn" href={adminDashboardPath()}>←戻る</a>
     </p>
     <h2 class="admin-card-title">news</h2>
     <p class="admin-hint">お知らせ記事の一覧です。保存は D1 に即時反映され、公開サイトの再デプロイは不要です。下書きは公開されません。</p>
@@ -152,11 +152,6 @@ import { adminDashboardPath, adminNewsEditPath } from "../../../lib/admin-paths"
 </script>
 
 <style>
-  .admin-back {
-    margin: 0 0 var(--space-2);
-    font-size: 0.88rem;
-  }
-
   .admin-actions--inline {
     margin-top: 0;
     margin-bottom: var(--space-3);
