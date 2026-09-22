@@ -4,7 +4,7 @@ import type { NewsArticle, NewsListItem } from "./news";
 import { NEWS_SEED } from "./news-seed";
 
 export const DB_MISSING_MESSAGE =
-  "D1 (DB) が未設定です。Dashboard で babytato-news を作成し、Bindings で変数名 DB を接続してください。";
+  "お知らせ用 D1 が未接続です。Dashboard → Storage & databases → D1 で babytato-news を作成し、Workers & Pages → babytato-link → Settings → Bindings で変数名 DB を接続してください（docs/SETUP-AUTH.md §4b）。";
 
 interface PostRow {
   slug: string;

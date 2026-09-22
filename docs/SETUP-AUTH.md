@@ -207,22 +207,39 @@ openssl rand -base64 32
 
 お知らせ**本文**は GitHub ではなく **D1**。admin で保存した時点で `GET /api/news` が新内容を返し、ホームは再デプロイなしで更新されます。links / discography / お問い合わせ webhook は従来どおり。
 
-**D1 / R2 は `wrangler.toml` では既定コメントアウト**（未作成の ID / バケットを書くと Pages の Function publish が失敗するため）。本番の News は **Dashboard Bindings** で接続します（CLI の `d1 create` は任意。無ければ Dashboard から作成可）。R2 未接続時は画像は GitHub `public/news/` フォールバック。
+**D1 / R2 は `wrangler.toml` では既定コメントアウト**（未作成の ID / バケットを書くと Pages の Function publish が失敗するため）。本番の News は **Dashboard Bindings** で接続します（CLI の `d1 create` は任意）。R2 未接続時は画像は GitHub `public/news/` フォールバック。
+
+#### チェックリスト（本番 News を動かす — 手動）
+
+未接続だと公開 / admin の news に「お知らせ用 D1 が未接続です…」と出ます。次を **この順**で:
+
+| # | 操作 |
+|---|------|
+| 1 | [Cloudflare Dashboard](https://dash.cloudflare.com/) を開く |
+| 2 | 左サイドバー **Storage & databases** → **D1 SQL database** |
+| 3 | **Create database** → Database name: **`babytato-news`** → **Create** |
+| 4 | 左サイドバー **Workers & Pages** → プロジェクト **`babytato-link`** を開く |
+| 5 | **Settings** → **Bindings** |
+| 6 | **Add** → 種類 **D1 database** |
+| 7 | **Variable name**（変数名）: **`DB`**（この名前以外だとコードが読めない） |
+| 8 | **D1 database**: 手順 3 の **`babytato-news`** を選択 → **Save** |
+| 9 | 画面上の環境切替で **Production** と **Preview** の**両方**に同じ Binding を付ける |
+| 10 | **Deployments** → 最新デプロイ → **Retry deployment**（Bindings を Function に反映） |
+| 11 | `https://babytato.link/` と manage の news を再読込。初回リクエストでテーブル作成 + `src/content/news` シードが入る |
 
 ```bash
-# 任意（Dashboard から作成してもよい）:
+# 任意（Dashboard 作成の代わり / database_id 取得用）:
 npx wrangler d1 create babytato-news
+# 出力の database_id を wrangler.toml の [[d1_databases]] に貼ってアンコメントしてもよい
+# （Dashboard Bindings だけでも本番は動く。両方揃えるとローカル remote 操作が楽）
+
 # R2 を使うときだけ:
 npx wrangler r2 bucket create babytato-news-media
 ```
 
-1. Dashboard → **Workers & Pages** → **`babytato-link`** → **Settings** → **Bindings**
-   - **D1**: 変数名 `DB` → データベース `babytato-news`
-   - **R2（任意）**: バケット作成後、`wrangler.toml` の `[[r2_buckets]]` をアンコメントし、変数名 `MEDIA` → `babytato-news-media` を接続
-2. **Production** と **Preview** の両方に付ける（必須。未接続だとデプロイは通るが `/api/news` が 500）
-3. （任意）`wrangler d1 create` の **database_id** を `wrangler.toml` の `[[d1_databases]]` に貼ってアンコメント（Dashboard 接続だけでも本番は動く）
-4. スキーマは Function が初回リクエストで `CREATE TABLE IF NOT EXISTS`（空 DB なら `src/content/news/*.md` 相当をシード）
-5. 任意: `npx wrangler d1 execute babytato-news --file=migrations/0001_posts.sql --remote`
+**R2（任意）:** バケット作成後、`wrangler.toml` の `[[r2_buckets]]` をアンコメントし、Bindings で変数名 **`MEDIA`** → `babytato-news-media` を Production + Preview に接続。
+
+**シード:** Function が初回で `CREATE TABLE IF NOT EXISTS`。空 DB なら `src/content/news/*.md` 相当を `news_meta.seeded` 付きで投入（手動 SQL 不要）。任意で `npx wrangler d1 execute babytato-news --file=migrations/0001_posts.sql --remote`。
 
 **ローカル:** `bun run build && bun run pages:dev`（`:8788`）。`pages:dev` は `--d1=DB` でローカル D1 を立てます（toml のリモート binding 不要）。ホームを `bun run dev`（`:4322`）で見る場合は、`/api/news` が Vite proxy 経由で `:8788` に届くので **pages:dev も同時起動**してください（SITE iframe も同様。推奨: `bun run site:dev`）。
 
@@ -353,6 +370,7 @@ bun run pages:dev
 | `Could not find project` / アカウントエラー | プロジェクト名が **`babytato-link`** か · Secret **`CLOUDFLARE_ACCOUNT_ID=4d3287a19985d6acc5d19bacf2178d24`** |
 | auth 成功（whoami）の直後に deploy が exit 1 | トークンに **User Memberships Read** 等 · `pages:deploy` 前に `rm -rf node_modules/.cache/wrangler` |
 | 複数アカウントで CI が非対話エラー | GitHub Secret **`CLOUDFLARE_ACCOUNT_ID`** を必ず設定 |
+| news「お知らせ用 D1 が未接続」 | §4b チェックリスト: D1 `babytato-news` 作成 → Bindings 変数名 **`DB`**（Production + Preview）→ Retry deployment |
 
 ---
 

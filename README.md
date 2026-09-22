@@ -47,7 +47,7 @@ RSS はチャンネルごとに最新 15 本まで。
 
 ホームの news はビルド時に Markdown を焼かず、ブラウザから `GET /api/news` を読みます。admin で保存すると D1 に upsert され、再デプロイなしで公開されます（下書きは公開 API に出ません）。
 
-本番では D1 `babytato-news`（binding `DB`）を **Dashboard → Bindings** で Production + Preview に接続します（`wrangler.toml` の D1 は未作成だと deploy が落ちるため既定オフ。ローカルは `pages:dev` の `--d1=DB`）。R2 `babytato-news-media`（`MEDIA`）は任意 — バケット作成後に toml をアンコメントして接続（未設定時は `public/news/`）。手順: [`docs/SETUP-AUTH.md`](./docs/SETUP-AUTH.md) §4b。
+本番では D1 `babytato-news`（binding **`DB`**）が必須。未接続だと news API がエラーになる。クリック手順: Dashboard → **Storage & databases** → **D1** で DB 作成 → **Workers & Pages** → **`babytato-link`** → **Settings** → **Bindings** で変数名 `DB` を Production + Preview に接続 → **Retry deployment**。詳細チェックリスト: [`docs/SETUP-AUTH.md`](./docs/SETUP-AUTH.md) §4b（`wrangler.toml` の D1 は未作成 ID だと deploy が落ちるため既定オフ。ローカルは `pages:dev` の `--d1=DB`）。R2 `babytato-news-media`（`MEDIA`）は任意。
 
 ## 開発
 

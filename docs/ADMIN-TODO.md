@@ -111,17 +111,19 @@ bun run build && bun run pages:dev
 
 ### 2-9. News 用 D1 / R2（即時公開）
 
-本文は GitHub ではなく D1。リモート create ができなくても、Dashboard で DB / バケットを作って Bindings に付ければよい。
+本文は GitHub ではなく D1。CLI にトークンが無くても Dashboard だけで可。クリック手順は [`SETUP-AUTH.md`](./SETUP-AUTH.md) §4b。
 
 ```bash
-npx wrangler d1 create babytato-news
+npx wrangler d1 create babytato-news   # 任意（database_id 取得）
 npx wrangler r2 bucket create babytato-news-media
 ```
 
-- [ ] D1 `babytato-news` を作成し、Pages の **Bindings** で変数名 **`DB`** に接続（Production + Preview）
+- [ ] **Storage & databases → D1** で `babytato-news` を作成
+- [ ] **Workers & Pages → babytato-link → Settings → Bindings** で変数名 **`DB`** → `babytato-news`（Production + Preview）
+- [ ] **Deployments → Retry deployment**（Bindings 反映）
 - [ ] （任意）`wrangler.toml` の `[[d1_databases]]` を実 ID でアンコメント（未作成だと Pages Function publish が失敗するため既定オフ）
 - [ ] （任意）R2 `babytato-news-media` を作成 → `wrangler.toml` の `[[r2_buckets]]` をアンコメント → 変数名 **`MEDIA`** に接続（未接続なら GitHub `public/news/`）
-- [ ] Production / Preview 両方。詳細は [`SETUP-AUTH.md`](./SETUP-AUTH.md) §4b
+- [ ] 初回 `/api/news` でシード確認。詳細は [`SETUP-AUTH.md`](./SETUP-AUTH.md) §4b
 - ローカル News: `pages:dev` は `--d1=DB`（toml 不要）
 
 ---

@@ -5,6 +5,7 @@ export type SocialPlatform =
   | 'x'
   | 'instagram'
   | 'youtube'
+  | 'niconico'
   | 'soundcloud'
   | 'tiktok'
   | 'fanbox'
@@ -24,6 +25,7 @@ export const SOCIAL_PLATFORMS: readonly SocialPlatform[] = [
   'x',
   'instagram',
   'youtube',
+  'niconico',
   'soundcloud',
   'tiktok',
   'fanbox',
@@ -38,6 +40,7 @@ const LABELS: Record<SocialPlatform, string> = {
   x: 'X',
   instagram: 'INSTAGRAM',
   youtube: 'YOUTUBE',
+  niconico: 'NICONICO',
   soundcloud: 'SOUNDCLOUD',
   tiktok: 'TIKTOK',
   fanbox: 'FANBOX',

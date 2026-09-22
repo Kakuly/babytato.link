@@ -23,9 +23,16 @@ pages_build_output_dir = "./dist"
 # D1 / R2 は未作成のまま wrangler.toml に書くと Pages の Function publish が失敗する
 # （存在しない database_id / bucket を検証される）。既定ではコメントアウト。
 #
-# 本番: Dashboard で D1 `babytato-news` を作成 → Settings → Bindings で変数名 `DB` を
-#       Production + Preview に接続（この toml をアンコメントしなくても可）。
-#       任意で `npx wrangler d1 create babytato-news` の ID を下記に貼ってアンコメント可。
+# 本番 News（必須・手動チェックリスト）:
+#   1. Dashboard → Storage & databases → D1 SQL database → Create database
+#      → Name: babytato-news → Create
+#   2. Workers & Pages → babytato-link → Settings → Bindings → Add → D1 database
+#      → Variable name: DB → D1 database: babytato-news → Save
+#      → Production と Preview の両方に付ける
+#   3. Deployments → 最新 → Retry deployment（Bindings 反映）
+#   4. 初回 /api/news でスキーマ作成 + src/content/news シード
+#   詳細: docs/SETUP-AUTH.md §4b
+#   任意: `npx wrangler d1 create babytato-news` の database_id を下記に貼ってアンコメント
 # ローカル: `bun run pages:dev` が `--d1=DB` で miniflare ローカル D1 を立てる。
 #
 # R2 有効化: npx wrangler r2 bucket create babytato-news-media

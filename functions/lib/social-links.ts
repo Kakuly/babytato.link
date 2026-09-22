@@ -1,10 +1,11 @@
 export const SOCIAL_LINKS_PATH = "src/data/social-links.json";
 
-/** Same template set as nocffie cockpit SNS_PRESETS (apple-music → appleMusic). */
+/** Same template set as nocffie cockpit SNS_PRESETS (apple-music → appleMusic) + niconico. */
 export type SocialLinksData = {
   x: string;
   instagram: string;
   youtube: string;
+  niconico: string;
   soundcloud: string;
   tiktok: string;
   fanbox: string;
@@ -19,6 +20,7 @@ export const SOCIAL_LINK_KEYS = [
   "x",
   "instagram",
   "youtube",
+  "niconico",
   "soundcloud",
   "tiktok",
   "fanbox",
@@ -33,6 +35,7 @@ export const SOCIAL_LINK_LABELS: Record<keyof SocialLinksData, string> = {
   x: "X",
   instagram: "Instagram",
   youtube: "YouTube",
+  niconico: "niconico",
   soundcloud: "SoundCloud",
   tiktok: "TikTok",
   fanbox: "FANBOX",
@@ -47,6 +50,7 @@ export const SOCIAL_LINK_PLACEHOLDERS: Record<keyof SocialLinksData, string> = {
   x: "https://x.com/…",
   instagram: "https://www.instagram.com/…",
   youtube: "https://www.youtube.com/@…",
+  niconico: "https://www.nicovideo.jp/user/…",
   soundcloud: "https://soundcloud.com/…",
   tiktok: "https://www.tiktok.com/@…",
   fanbox: "https://….fanbox.cc/",
@@ -62,6 +66,7 @@ function emptyLinks(): SocialLinksData {
     x: "",
     instagram: "",
     youtube: "",
+    niconico: "",
     soundcloud: "",
     tiktok: "",
     fanbox: "",
