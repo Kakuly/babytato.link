@@ -11,6 +11,12 @@ export type YouTubeVideo = {
   thumbnailUrl?: string;
 };
 
+/** YouTube RSS rejects some custom UAs; use a stable browser-like string. */
+const FETCH_HEADERS = {
+  'User-Agent':
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+} as const;
+
 const THUMBNAIL_VARIANTS = ['maxresdefault', 'sddefault', 'hqdefault', 'mqdefault'] as const;
 
 /** maxresdefault returns a ~1 KB placeholder when unavailable; real assets are much larger. */
@@ -54,15 +60,15 @@ function parseFeed(xml: string, source: YouTubeSource, sourceLabel: string): You
 }
 
 async function readContentLength(url: string): Promise<number> {
-  const headers = { 'User-Agent': 'babytato.link/build' };
-
-  const head = await fetch(url, { method: 'HEAD', headers });
+  const head = await fetch(url, { method: 'HEAD', headers: FETCH_HEADERS });
   if (head.ok) {
     const length = Number(head.headers.get('content-length') ?? 0);
     if (length > 0) return length;
   }
 
-  const range = await fetch(url, { headers: { ...headers, Range: 'bytes=0-0' } });
+  const range = await fetch(url, {
+    headers: { ...FETCH_HEADERS, Range: 'bytes=0-0' },
+  });
   if (!range.ok) return 0;
 
   const total = range.headers.get('content-range')?.split('/')[1];
@@ -78,7 +84,7 @@ async function probeThumbnailVariant(
   try {
     const response = await fetch(url, {
       method: 'HEAD',
-      headers: { 'User-Agent': 'babytato.link/build' },
+      headers: FETCH_HEADERS,
     });
 
     if (!response.ok) return false;
@@ -124,12 +130,15 @@ async function fetchChannelVideos(
   const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
 
   try {
-    const response = await fetch(feedUrl, {
-      headers: { 'User-Agent': 'babytato.link/build' },
-    });
+    let response: Response | null = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      response = await fetch(feedUrl, { headers: FETCH_HEADERS });
+      if (response.ok) break;
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
+    }
 
-    if (!response.ok) {
-      console.warn(`[youtube] Failed to fetch ${source}: ${response.status}`);
+    if (!response?.ok) {
+      console.warn(`[youtube] Failed to fetch ${source}: ${response?.status}`);
       return [];
     }
 
