@@ -47,7 +47,7 @@ RSS はチャンネルごとに最新 15 本まで。
 
 ホームの news はビルド時に Markdown を焼かず、ブラウザから `GET /api/news` を読みます。admin で保存すると D1 に upsert され、再デプロイなしで公開されます（下書きは公開 API に出ません）。
 
-本番では D1 `babytato-news`（binding `DB`）と、できれば R2 `babytato-news-media`（binding `MEDIA`）を Dashboard の Bindings に接続します。手順: [`docs/SETUP-AUTH.md`](./docs/SETUP-AUTH.md) §4b。
+本番では D1 `babytato-news`（binding `DB`）を Dashboard の Bindings に接続します。R2 `babytato-news-media`（`MEDIA`）は任意 — バケット作成後に `wrangler.toml` の `[[r2_buckets]]` をアンコメントして接続（未設定時は `public/news/`）。手順: [`docs/SETUP-AUTH.md`](./docs/SETUP-AUTH.md) §4b。
 
 ## 開発
 

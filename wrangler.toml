@@ -20,15 +20,18 @@ pages_build_output_dir = "./dist"
 #
 # News 本文は D1（即時公開）。links / discography は GitHub。画像は R2 MEDIA（無ければ GitHub public/news/）。
 # 本番: npx wrangler d1 create babytato-news → 下記 database_id を差し替え
-#       かつ Dashboard → Settings → Bindings で DB / MEDIA を接続
-#       npx wrangler r2 bucket create babytato-news-media
+#       かつ Dashboard → Settings → Bindings で DB を接続
+# R2 はバケット未作成だと Pages の Function publish が失敗するため、既定ではコメントアウト。
+# 有効化するとき: npx wrangler r2 bucket create babytato-news-media
+#                  → 下記 [[r2_buckets]] をアンコメント → Dashboard で MEDIA を接続
 
 [[d1_databases]]
 binding = "DB"
 database_name = "babytato-news"
+# ローカル用プレースホルダ。本番 D1 は Dashboard Bindings 側の接続が優先。実 ID に差し替え推奨。
 database_id = "00000000-0000-4000-8000-000000000001"
 migrations_dir = "migrations"
 
-[[r2_buckets]]
-binding = "MEDIA"
-bucket_name = "babytato-news-media"
+# [[r2_buckets]]
+# binding = "MEDIA"
+# bucket_name = "babytato-news-media"
