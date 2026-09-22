@@ -203,6 +203,31 @@ openssl rand -base64 32
 
 5. **Save** → 再デプロイ（main に push 済みなら自動、未反映なら **Retry deployment**）
 
+### 4b. News 用 D1 / R2（即時公開）
+
+お知らせ**本文**は GitHub ではなく **D1**。admin で保存した時点で `GET /api/news` が新内容を返し、ホームは再デプロイなしで更新されます。links / discography / お問い合わせ webhook は従来どおり。
+
+`wrangler.toml` にバインディング枠は入れてあります。**本番では Dashboard で実リソースを接続**してください（リモート `d1 create` は `CLOUDFLARE_API_TOKEN` があれば実行可。無ければ Dashboard から作れます）。
+
+```bash
+npx wrangler d1 create babytato-news
+npx wrangler r2 bucket create babytato-news-media
+```
+
+1. `wrangler d1 create` が出す **database_id** を `wrangler.toml` の `[[d1_databases]]` に貼る（ローカル用プレースホルダ `00000000-0000-4000-8000-000000000001` を差し替え）
+2. Dashboard → **Workers & Pages** → **`babytato-link`** → **Settings** → **Bindings**
+   - **D1**: 変数名 `DB` → データベース `babytato-news`
+   - **R2**: 変数名 `MEDIA` → バケット `babytato-news-media`
+3. Production / Preview の両方に付ける
+4. スキーマは Function が初回リクエストで `CREATE TABLE IF NOT EXISTS`（空 DB なら `src/content/news/*.md` 相当をシード）
+5. 任意: `npx wrangler d1 execute babytato-news --file=migrations/0001_posts.sql --remote`
+
+**ローカル:** `bun run build && bun run pages:dev`（`:8788`）。`wrangler.toml` のプレースホルダ ID のままでも miniflare がローカル D1 を立てます。ホームを `bun run dev`（`:4322`）で見る場合は、news が `http://127.0.0.1:8788/api/news` を叩くので **pages:dev も同時起動**してください。
+
+**画像:** `MEDIA` があれば R2 → `GET /api/news/media/:key`（デプロイ不要）。未接続なら GitHub `public/news/`（こちらは Pages 再ビルドが走る）。
+
+`GITHUB_TOKEN` は **news 本文の保存には不要**（links / discography / GitHub 画像フォールバック用）。
+
 ### 5. コードをデプロイ
 
 ```bash
@@ -343,5 +368,5 @@ bun run pages:dev
 | `functions/_middleware.ts` | `manage.babytato.link` のホストベースルーティング |
 | `functions/lib/manage-host.ts` | manage ホスト判定 |
 | `src/lib/admin-paths.ts` | クライアント側の admin URL 解決 |
-| `wrangler.toml` | Pages 設定 |
+| `wrangler.toml` | Pages 設定 · D1 `DB` · R2 `MEDIA` |
 | `.github/workflows/deploy.yml` | GitHub Actions 本番デプロイ |

@@ -1,0 +1,124 @@
+---
+---
+
+<div class="home-news-root" data-home-news>
+  <p class="home-news__status" data-home-news-status>読み込み中…</p>
+  <div class="home-news" data-home-news-list hidden></div>
+  <p class="home-news__empty" data-home-news-empty hidden>お知らせはまだありません。</p>
+</div>
+
+<script>
+  import { initHomeNews } from "../scripts/home-news";
+  initHomeNews();
+</script>
+
+<style>
+  .home-news-root,
+  .home-news {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .home-news__status,
+  .home-news__empty {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .home-news__status.is-error {
+    color: var(--ink);
+  }
+
+  .home-news-root :global(.news-item) {
+    min-width: 0;
+    max-width: 100%;
+    padding-bottom: 1.15rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-break: strict;
+  }
+
+  .home-news-root :global(.news-item + .news-item) {
+    margin-top: 1.15rem;
+    padding-top: 1.15rem;
+    border-top: 2px solid var(--line);
+  }
+
+  .home-news-root :global(.news-item__title) {
+    margin: 0.25rem 0 0;
+    color: var(--ink);
+    -webkit-text-fill-color: var(--ink);
+    -webkit-text-stroke: 0;
+    font-family: var(--font);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .home-news-root :global(.news-item__meta) {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+  }
+
+  .home-news-root :global(.news-item__summary) {
+    margin: 0.4rem 0 0;
+    color: var(--muted);
+    -webkit-text-fill-color: var(--muted);
+    -webkit-text-stroke: 0;
+    font-family: var(--font);
+    font-size: 0.82rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .home-news-root :global(.news-item__prose) {
+    min-width: 0;
+    max-width: 100%;
+    color: var(--ink);
+    -webkit-text-fill-color: var(--ink);
+    -webkit-text-stroke: 0;
+    font-size: 0.88rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .home-news-root :global(.news-item__prose p) {
+    margin: 0.75rem 0 0;
+  }
+
+  .home-news-root :global(.news-item__prose p:first-child) {
+    margin-top: 0.75rem;
+  }
+
+  .home-news-root :global(.news-item__prose img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0.75rem 0;
+  }
+
+  .home-news-root :global(.news-item__prose ul),
+  .home-news-root :global(.news-item__prose ol) {
+    margin: 0.75rem 0 0;
+    padding-left: 1.25rem;
+  }
+
+  .home-news-root :global(.news-item__prose h2) {
+    margin: 0.85rem 0 0;
+    font-family: var(--font);
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+</style>

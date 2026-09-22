@@ -16,3 +16,18 @@ pages_build_output_dir = "./dist"
 # wrangler.toml や git にシークレットを書かないこと。
 # セットアップ手順: docs/SETUP-AUTH.md
 # お問い合わせ: CONTACT_WEBHOOK_URL（Discord / Slack Incoming Webhook）
+#
+# News 本文は D1（即時公開）。links / discography は GitHub。画像は R2 MEDIA（無ければ GitHub public/news/）。
+# 本番: npx wrangler d1 create babytato-news → 下記 database_id を差し替え
+#       かつ Dashboard → Settings → Bindings で DB / MEDIA を接続
+#       npx wrangler r2 bucket create babytato-news-media
+
+[[d1_databases]]
+binding = "DB"
+database_name = "babytato-news"
+database_id = "00000000-0000-4000-8000-000000000001"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "babytato-news-media"

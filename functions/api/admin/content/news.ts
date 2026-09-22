@@ -1,73 +1,28 @@
 import { requireAdmin, jsonError } from "../../../lib/admin-auth";
 import type { PagesEnv } from "../../../lib/env";
 import {
-  deleteGitHubFile,
-  listGitHubDirectory,
-  readGitHubFile,
-  writeGitHubFile,
-} from "../../../lib/github";
-import {
-  NEWS_DIR,
-  makeNewsSlug,
-  newsFilePath,
-  parseNewsMarkdown,
-  serializeNewsMarkdown,
-  slugFromFilename,
-  validateNewsInput,
-  type NewsArticle,
-  type NewsListItem,
-} from "../../../lib/news";
+  deleteNewsArticle,
+  ensureUniqueSlug,
+  listNewsArticles,
+  readNewsArticle,
+  requireNewsDb,
+  upsertNewsArticle,
+} from "../../../lib/news-db";
+import { makeNewsSlug, validateNewsInput } from "../../../lib/news";
 
 interface ContentContext {
   request: Request;
   env: PagesEnv;
 }
 
-async function listNewsArticles(env: PagesEnv): Promise<NewsListItem[]> {
-  const entries = await listGitHubDirectory(env, NEWS_DIR);
-  const articles: NewsListItem[] = [];
-
-  for (const entry of entries) {
-    const slug = slugFromFilename(entry.name);
-    if (!slug) continue;
-
-    const file = await readGitHubFile(env, entry.path);
-    if (!file) continue;
-
-    const parsed = parseNewsMarkdown(file.content, slug);
-    if (!parsed) continue;
-
-    articles.push({
-      slug: parsed.slug,
-      title: parsed.title,
-      date: parsed.date,
-      summary: parsed.summary,
-      draft: parsed.draft,
-      sha: file.sha || entry.sha,
-    });
-  }
-
-  return articles.sort((a, b) => b.date.localeCompare(a.date) || b.slug.localeCompare(a.slug));
-}
-
-async function readNewsArticle(env: PagesEnv, slug: string): Promise<(NewsArticle & { sha: string }) | null> {
-  const file = await readGitHubFile(env, newsFilePath(slug));
-  if (!file) return null;
-
-  const parsed = parseNewsMarkdown(file.content, slug);
-  if (!parsed) return null;
-
-  return { ...parsed, sha: file.sha };
-}
-
-async function ensureUniqueSlug(env: PagesEnv, baseSlug: string): Promise<string> {
-  let slug = baseSlug;
-  let suffix = 2;
-  while (await readGitHubFile(env, newsFilePath(slug))) {
-    slug = `${baseSlug}-${suffix}`;
-    suffix += 1;
-  }
-  return slug;
+function jsonOk(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "private, no-store",
+    },
+  });
 }
 
 export async function onRequestGet(context: ContentContext): Promise<Response> {
@@ -78,16 +33,17 @@ export async function onRequestGet(context: ContentContext): Promise<Response> {
   const slug = url.searchParams.get("slug")?.trim();
 
   try {
+    const db = requireNewsDb(context.env);
     if (slug) {
-      const article = await readNewsArticle(context.env, slug);
+      const article = await readNewsArticle(db, slug, false);
       if (!article) {
         return jsonError("記事が見つかりません。", 404);
       }
-      return Response.json({ ok: true, article });
+      return jsonOk({ ok: true, article });
     }
 
-    const articles = await listNewsArticles(context.env);
-    return Response.json({ ok: true, articles });
+    const articles = await listNewsArticles(db, false);
+    return jsonOk({ ok: true, articles });
   } catch (error) {
     const message = error instanceof Error ? error.message : "読み込みに失敗しました。";
     return jsonError(message, 500);
@@ -108,56 +64,42 @@ export async function onRequestPost(context: ContentContext): Promise<Response> 
   const payload = body && typeof body === "object" ? (body as Record<string, unknown>) : null;
   if (!payload) return jsonError("リクエストが不正です。");
 
-  const requestedSlug = typeof payload.slug === "string" ? payload.slug.trim() : "";
-  const existing = requestedSlug ? await readNewsArticle(context.env, requestedSlug) : null;
-
-  const article = validateNewsInput(
-    {
-      slug: requestedSlug || undefined,
-      title: typeof payload.title === "string" ? payload.title : undefined,
-      date: typeof payload.date === "string" ? payload.date : undefined,
-      summary: typeof payload.summary === "string" ? payload.summary : undefined,
-      draft: payload.draft === true,
-      body: typeof payload.body === "string" ? payload.body : undefined,
-    },
-    existing?.slug,
-  );
-
-  if (!article) {
-    return jsonError("タイトル・日付・本文を確認してください。");
-  }
-
   try {
-    let slug = article.slug;
-    let sha: string | undefined;
+    const db = requireNewsDb(context.env);
+    const requestedSlug = typeof payload.slug === "string" ? payload.slug.trim() : "";
+    const existing = requestedSlug ? await readNewsArticle(db, requestedSlug, false) : null;
 
-    if (existing) {
-      const clientSha = typeof payload.sha === "string" ? payload.sha.trim() : "";
-      if (clientSha && existing.sha && clientSha !== existing.sha) {
-        return jsonError("他の編集と競合しました。再読み込みしてから保存してください。", 409);
-      }
-      sha = existing.sha;
-    } else {
-      const baseSlug = slug || makeNewsSlug(article.date, article.title);
-      slug = await ensureUniqueSlug(context.env, baseSlug);
-      article.slug = slug;
-    }
-
-    const content = serializeNewsMarkdown(article);
-    const result = await writeGitHubFile(
-      context.env,
-      newsFilePath(slug),
-      content,
-      sha,
-      existing
-        ? `admin: update news ${slug} (${auth.username})`
-        : `admin: create news ${slug} (${auth.username})`,
+    const article = validateNewsInput(
+      {
+        slug: requestedSlug || undefined,
+        title: typeof payload.title === "string" ? payload.title : undefined,
+        date: typeof payload.date === "string" ? payload.date : undefined,
+        summary: typeof payload.summary === "string" ? payload.summary : undefined,
+        draft: payload.draft === true,
+        body: typeof payload.body === "string" ? payload.body : undefined,
+      },
+      existing?.slug,
     );
 
-    return Response.json({
+    if (!article) {
+      return jsonError("タイトル・日付・本文を確認してください。");
+    }
+
+    const clientSha = typeof payload.sha === "string" ? payload.sha.trim() : "";
+    if (existing && clientSha && existing.sha && clientSha !== existing.sha) {
+      return jsonError("他の編集と競合しました。再読み込みしてから保存してください。", 409);
+    }
+
+    if (!existing) {
+      const baseSlug = article.slug || makeNewsSlug(article.date, article.title);
+      article.slug = await ensureUniqueSlug(db, baseSlug);
+    }
+
+    const saved = await upsertNewsArticle(db, article);
+    return jsonOk({
       ok: true,
-      article: { ...article, sha: result.sha },
-      message: "保存しました。Cloudflare Pages の再ビルドが始まります。",
+      article: saved,
+      message: saved.draft ? "下書きを保存しました。公開サイトには出ていません。" : "保存しました。公開サイトにすぐ反映されます。",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "保存に失敗しました。";
@@ -181,7 +123,8 @@ export async function onRequestDelete(context: ContentContext): Promise<Response
   if (!slug) return jsonError("slug が必要です。");
 
   try {
-    const existing = await readNewsArticle(context.env, slug);
+    const db = requireNewsDb(context.env);
+    const existing = await readNewsArticle(db, slug, false);
     if (!existing) {
       return jsonError("記事が見つかりません。", 404);
     }
@@ -191,16 +134,10 @@ export async function onRequestDelete(context: ContentContext): Promise<Response
       return jsonError("他の編集と競合しました。再読み込みしてから削除してください。", 409);
     }
 
-    await deleteGitHubFile(
-      context.env,
-      newsFilePath(slug),
-      existing.sha,
-      `admin: delete news ${slug} (${auth.username})`,
-    );
-
-    return Response.json({
+    await deleteNewsArticle(db, slug);
+    return jsonOk({
       ok: true,
-      message: "削除しました。Cloudflare Pages の再ビルドが始まります。",
+      message: "削除しました。公開サイトからすぐ消えます。",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "削除に失敗しました。";

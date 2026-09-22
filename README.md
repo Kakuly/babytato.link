@@ -1,6 +1,6 @@
 # babytato.link
 
-tato の公式サイト。Astro + Markdown で管理。
+tato の公式サイト。Astro + Cloudflare Pages Functions。お知らせ本文は D1（即時公開）、その他の CMS は GitHub。
 
 ## ページ
 
@@ -16,7 +16,7 @@ tato の公式サイト。Astro + Markdown で管理。
 |------|----------|
 | サイト情報 | `src/data/site.ts` |
 | リンク | `src/data/links.ts` |
-| お知らせ | `src/content/news/*.md` |
+| お知らせ | 管理画面 `/admin/news/` → D1。ホームは `GET /api/news`。`src/content/news/*.md` は初回シード用 |
 | YouTube チャンネル | `src/data/youtube.ts` |
 
 ## Works（YouTube 自動取得）
@@ -39,6 +39,12 @@ RSS はチャンネルごとに最新 15 本まで。
 | `CONTACT_WEBHOOK_URL` | Discord または Slack の Incoming Webhook URL |
 
 ローカルは `.dev.vars.example` をコピーした `.dev.vars` に同じ変数を置きます。`astro dev`（`:4322`）からの送信は `pages:dev`（`:8788`）へ転送します。
+
+## お知らせ（即時公開）
+
+ホームの news はビルド時に Markdown を焼かず、ブラウザから `GET /api/news` を読みます。admin で保存すると D1 に upsert され、再デプロイなしで公開されます（下書きは公開 API に出ません）。
+
+本番では D1 `babytato-news`（binding `DB`）と、できれば R2 `babytato-news-media`（binding `MEDIA`）を Dashboard の Bindings に接続します。手順: [`docs/SETUP-AUTH.md`](./docs/SETUP-AUTH.md) §4b。
 
 ## 開発
 

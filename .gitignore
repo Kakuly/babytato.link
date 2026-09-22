@@ -17,3 +17,6 @@ dist/
 
 # logs
 *.log
+
+# wrangler / miniflare local state (D1, R2, KV sqlite)
+.wrangler/

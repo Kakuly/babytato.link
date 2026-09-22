@@ -28,6 +28,14 @@ export interface NewsListItem extends NewsFrontmatter {
   sha: string;
 }
 
+export interface PublicNewsArticle {
+  slug: string;
+  title: string;
+  date: string;
+  summary?: string;
+  body: string;
+}
+
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/;

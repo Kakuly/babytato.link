@@ -9,7 +9,7 @@ import { adminNewsPath } from "../../../lib/admin-paths";
       <a href={adminNewsPath()}>← news</a>
     </p>
     <h2 class="admin-card-title" id="news-edit-heading">new article</h2>
-    <p class="admin-hint">タイトル・日付・本文を編集して保存します。本文は WYSIWYG で編集され、Markdown として保存されます。画像はエディタへドラッグ＆ドロップ、ペースト、またはツールバーの img から挿入できます（JPEG / PNG / WebP / GIF、10MB まで）。</p>
+    <p class="admin-hint">タイトル・日付・本文を編集して保存します。本文は WYSIWYG で編集され、D1 に Markdown として保存されます（公開は下書きオフで即時）。画像はドラッグ＆ドロップ、ペースト、またはツールバーの img（JPEG / PNG / WebP / GIF、10MB まで）。R2 があれば即時表示、未接続時は GitHub 経由で再ビルド後に表示されます。</p>
 
     <form id="news-form" class="admin-grid">
       <div class="admin-field">

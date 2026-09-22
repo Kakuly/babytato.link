@@ -30,7 +30,6 @@ export function manageAdminInternalPath(pathname: string): string | null {
 }
 
 export function isManagePassthroughPath(pathname: string): boolean {
-  if (pathname.startsWith("/api/admin/")) return true;
-  if (pathname === "/api/contact" || pathname.startsWith("/api/contact/")) return true;
+  if (pathname.startsWith("/api/")) return true;
   return ASSET_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }

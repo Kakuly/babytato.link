@@ -16,6 +16,8 @@ interface ContentContext {
   env: PagesEnv;
 }
 
+const MEDIA_KEY_RE = /^[a-z0-9][a-z0-9.-]{0,120}$/;
+
 async function shortHash(bytes: Uint8Array, length = 10): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return [...new Uint8Array(digest)]
@@ -54,6 +56,21 @@ export async function onRequestPost(context: ContentContext): Promise<Response> 
   try {
     const bytes = new Uint8Array(await file.arrayBuffer());
     const filename = newsImageFilename(newsImagePrefix(slug), await shortHash(bytes), ext);
+    if (!MEDIA_KEY_RE.test(filename)) {
+      return jsonError("画像ファイル名を生成できませんでした。", 500);
+    }
+
+    if (context.env.MEDIA) {
+      await context.env.MEDIA.put(filename, bytes, {
+        httpMetadata: { contentType: mime },
+      });
+      return Response.json({
+        ok: true,
+        url: `/api/news/media/${filename}`,
+        message: "画像をアップロードしました。",
+      });
+    }
+
     const repoPath = newsImageRepoPath(filename);
     const existingSha = await getGitHubFileSha(context.env, repoPath);
     await writeGitHubBinaryFile(
@@ -67,7 +84,7 @@ export async function onRequestPost(context: ContentContext): Promise<Response> 
     return Response.json({
       ok: true,
       url: newsImagePublicPath(filename),
-      message: "画像をアップロードしました。",
+      message: "画像を GitHub に保存しました。サイト再ビルド後に表示されます。",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "アップロードに失敗しました。";

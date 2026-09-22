@@ -57,11 +57,11 @@ Phase 1（SNS リンク編集）完了後の実装ロードマップ。nocffie �
 
 ### Phase 2b — News WYSIWYG
 
-- [x] 現状: `src/content/news/*.md`（Astro Content Collections）
+- [x] 現状: D1 `posts`（`src/content/news/*.md` は空 DB のシードのみ）
 - [x] 目標: Note 風 WYSIWYG（見出し · 本文 · 画像 · 公開日）
-- [x] 保存先: Markdown 生成 → GitHub commit（frontmatter + body）
+- [x] 保存先: D1 upsert（即時。GitHub commit なし）
 - [x] 管理 UI: `/admin/news/` — 一覧 · 新規 · 編集
-- [x] エディタ: TipTap。画像挿入は未実装（R2 未設定）
+- [x] エディタ: TipTap。画像は R2 `MEDIA`（なければ GitHub `public/news/`）
 
 ### Phase 2c — site info
 

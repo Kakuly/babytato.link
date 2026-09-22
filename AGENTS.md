@@ -48,7 +48,7 @@ nondesu の `pages:dev` はスクリプト上ポート未指定（wrangler デ�
 
 ## 編集入口
 
-`src/data/site.ts` · `links.ts` · `youtube.ts` · `src/content/news/*.md`  
+`src/data/site.ts` · `links.ts` · `youtube.ts` · お知らせは admin → D1（`src/content/news/*.md` はシード）  
 Works = ビルド時 YouTube RSS（`@tat040`, `@nocffie`、各 15 本）
 
 ## ホロ合成（触る前に読む）

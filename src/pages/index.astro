@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import NewsItem from '../components/NewsItem.astro';
-import { getCollection } from 'astro:content';
+import NewsList from '../components/NewsList.astro';
 import Barcode from '../components/Barcode.astro';
 import DiscographyGrid from '../components/DiscographyGrid.astro';
 import ContactForm from '../components/ContactForm.astro';
@@ -10,10 +9,6 @@ import VideoCarousel from '../components/VideoCarousel.astro';
 import { site } from '../data/site';
 import { discography, sortByDateDesc } from '../lib/discography';
 import { getTatoYouTubeVideos } from '../lib/youtube';
-
-const newsEntries = (await getCollection('news'))
-  .filter((entry) => !entry.data.draft)
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
 const latestVideos = await getTatoYouTubeVideos(10);
 const collabo = sortByDateDesc(discography.collabo);
@@ -94,17 +89,7 @@ const motto = 'やりたいことを、やりたいだけやる';
         <p class="home-block__kicker">updates</p>
       </header>
       <div class="home-block__body">
-        {
-          newsEntries.length > 0 ? (
-            <div class="home-news">
-              {newsEntries.map((entry) => (
-                <NewsItem entry={entry} />
-              ))}
-            </div>
-          ) : (
-            <p class="home-news__empty">お知らせはまだありません。</p>
-          )
-        }
+        <NewsList />
       </div>
     </section>
 
@@ -605,21 +590,6 @@ const motto = 'やりたいことを、やりたいだけやる';
     display: grid;
     gap: 2.2rem;
     min-width: 0;
-  }
-
-  .home-news {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  .home-news__empty {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.92rem;
-    overflow-wrap: anywhere;
-    word-break: break-word;
   }
 
   @media (max-width: 720px) {

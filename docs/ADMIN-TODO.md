@@ -109,6 +109,20 @@ bun run build && bun run pages:dev
 
 - [ ] ~~Zero Trust Access で `manage.babytato.link` を保護~~（不要ならチェック不要）
 
+### 2-9. News 用 D1 / R2（即時公開）
+
+本文は GitHub ではなく D1。リモート create ができなくても、Dashboard で DB / バケットを作って Bindings に付ければよい。
+
+```bash
+npx wrangler d1 create babytato-news
+npx wrangler r2 bucket create babytato-news-media
+```
+
+- [ ] D1 `babytato-news` を作成し、Pages の **Bindings** で変数名 **`DB`** に接続
+- [ ] `wrangler.toml` の `database_id` を実 ID に更新（任意だが推奨）
+- [ ] R2 `babytato-news-media` を作成し、変数名 **`MEDIA`** に接続（画像の即時表示。未接続なら GitHub `public/news/` フォールバック）
+- [ ] Production / Preview 両方。詳細は [`SETUP-AUTH.md`](./SETUP-AUTH.md) §4b
+
 ---
 
 ## 3. To implement（コード — 未着手）
@@ -129,11 +143,12 @@ bun run build && bun run pages:dev
 
 - [x] GitHub Contents API でファイル read/write（`GITHUB_TOKEN` 使用）
 - [x] SNS リンク: `src/data/social-links.json` · `/api/admin/content/links`
-- [x] ニュース: `src/content/news/*.md` · `/api/admin/content/news`（GET 一覧/単体 · POST 作成/更新 · DELETE）
+- [x] ニュース: D1 `posts` · `/api/admin/content/news`（GET 一覧/単体 · POST upsert · DELETE）· 公開 `GET /api/news`
+- [x] ホーム `#news`: `NewsList` → `GET /api/news`（published only · 再デプロイ不要）
 - [x] ディスコグラフィー: `src/data/discography.json` · `/api/admin/content/discography`（GET/PUT · POST ジャケット）
 - [ ] 編集対象の整理:
   - [ ] `src/data/site.ts`（サイト情報）
-- [ ] バリデーション · 競合検知（SHA） · commit メッセージ（links / news / discography で部分実装済）
+- [ ] バリデーション · 競合検知（SHA / updated_at） · commit メッセージ（links / discography で部分実装済）
 
 ### Phase C — 管理 UI
 
@@ -142,7 +157,7 @@ bun run build && bun run pages:dev
 - [x] discography 編集（`/admin/discography/` · collabo / my releases · ジャケット upload）
 - [ ] ダッシュボードの残りタイル
   - [ ] site info 編集フォーム
-- [x] 保存 → API → GitHub commit → Pages 再ビルドのフィードバック表示（links · news · discography）
+- [x] 保存 → news は D1 即時 / links · discography は GitHub commit → Pages 再ビルド
 
 ### Phase D — 運用・セキュリティ（任意）
 
@@ -170,9 +185,13 @@ bun run build && bun run pages:dev
 | `src/pages/admin/index.astro` | ダッシュボード |
 | `src/pages/admin/news/` | ニュース一覧 · 編集 UI |
 | `src/pages/admin/discography/` | ディスコグラフィー編集 UI |
-| `functions/api/admin/content/news.ts` | ニュース GitHub API |
+| `functions/api/admin/content/news.ts` | ニュース D1 CRUD |
+| `functions/api/news.ts` | 公開ニュース API（draft なし） |
+| `functions/lib/news-db.ts` | D1 スキーマ · シード · upsert |
+| `src/components/NewsList.astro` | ホーム news（クライアント fetch） |
+| `src/scripts/home-news.ts` | `/api/news` 取得 · Markdown 描画 |
 | `functions/api/admin/content/discography.ts` | ディスコグラフィー GitHub API |
-| `functions/lib/news.ts` | ニュース Markdown パース/保存 |
+| `functions/lib/news.ts` | ニュース Markdown パース / バリデーション |
 | `functions/api/admin/` | login / session / logout |
 | `functions/_middleware.ts` | manage ホストルーティング |
 | `functions/lib/admin-users.ts` | アカウント照合 |
