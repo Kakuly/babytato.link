@@ -1,6 +1,14 @@
 {
   "collabo": [
     {
+      "id": "everything-to-break-me",
+      "title": "Everything /// (to break me)",
+      "type": "album",
+      "img": "/releases/everything-to-break-me.png",
+      "date": "2024-12-30",
+      "url": "https://big-up.style/Rfjwgu1vFD"
+    },
+    {
       "id": "gucha",
       "title": "gucha!",
       "type": "single",
