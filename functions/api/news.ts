@@ -1,5 +1,6 @@
 import {
   listPublishedNews,
+  publicNewsListPayload,
   publicNewsPayload,
   readNewsArticle,
   requireNewsDb,
@@ -69,7 +70,7 @@ export async function onRequestGet(context: NewsContext): Promise<Response> {
     const articles = await listPublishedNews(db);
     return jsonOk(context.request, {
       ok: true,
-      articles: articles.map(publicNewsPayload),
+      articles: articles.map(publicNewsListPayload),
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "読み込みに失敗しました。";

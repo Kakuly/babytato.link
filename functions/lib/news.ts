@@ -28,11 +28,14 @@ export interface NewsListItem extends NewsFrontmatter {
   sha: string;
 }
 
-export interface PublicNewsArticle {
+export interface PublicNewsListItem {
   slug: string;
   title: string;
   date: string;
   summary?: string;
+}
+
+export interface PublicNewsArticle extends PublicNewsListItem {
   body: string;
 }
 

@@ -11,7 +11,7 @@ interface PostRow {
   title: string;
   date: string;
   summary: string;
-  body: string;
+  body?: string;
   draft: number;
   updated_at: string;
 }
@@ -89,7 +89,7 @@ function rowToArticle(row: PostRow): NewsArticle & { updated_at: string; sha: st
     date: row.date,
     summary: row.summary || undefined,
     draft: row.draft ? true : undefined,
-    body: row.body,
+    body: row.body ?? "",
     updated_at: row.updated_at,
     sha: row.updated_at,
   };
@@ -109,20 +109,15 @@ function rowToListItem(row: PostRow): NewsListItem {
 export async function listNewsArticles(db: NewsD1, publishedOnly: boolean): Promise<NewsListItem[]> {
   await ensureNewsDb(db);
   const sql = publishedOnly
-    ? "SELECT slug, title, date, summary, body, draft, updated_at FROM posts WHERE draft = 0 ORDER BY date DESC, slug DESC"
-    : "SELECT slug, title, date, summary, body, draft, updated_at FROM posts ORDER BY date DESC, slug DESC";
+    ? "SELECT slug, title, date, summary, draft, updated_at FROM posts WHERE draft = 0 ORDER BY date DESC, slug DESC"
+    : "SELECT slug, title, date, summary, draft, updated_at FROM posts ORDER BY date DESC, slug DESC";
   const { results } = await db.prepare(sql).all<PostRow>();
   return results.map(rowToListItem);
 }
 
-export async function listPublishedNews(db: NewsD1): Promise<(NewsArticle & { updated_at: string })[]> {
-  await ensureNewsDb(db);
-  const { results } = await db
-    .prepare(
-      "SELECT slug, title, date, summary, body, draft, updated_at FROM posts WHERE draft = 0 ORDER BY date DESC, slug DESC",
-    )
-    .all<PostRow>();
-  return results.map(rowToArticle);
+/** Published posts for the public home list — no body column. */
+export async function listPublishedNews(db: NewsD1): Promise<NewsListItem[]> {
+  return listNewsArticles(db, true);
 }
 
 export async function readNewsArticle(
@@ -198,12 +193,18 @@ export async function deleteNewsArticle(db: NewsD1, slug: string): Promise<boole
   return true;
 }
 
-export function publicNewsPayload(article: NewsArticle) {
+export function publicNewsListPayload(article: Pick<NewsArticle, "slug" | "title" | "date" | "summary">) {
   return {
     slug: article.slug,
     title: article.title,
     date: article.date,
     summary: article.summary,
+  };
+}
+
+export function publicNewsPayload(article: NewsArticle) {
+  return {
+    ...publicNewsListPayload(article),
     body: article.body,
   };
 }
