@@ -25,8 +25,19 @@
 
 ```bash
 bun install
-bun run dev -- --port 4322   # SITE ハブ前提。:4321 は nondesu と競合
+bun run dev          # :4322（package.json + astro.config で固定・strictPort）
+bun run pages:dev    # :8788 @ 127.0.0.1（Functions / admin）
 ```
+
+### ポート割り当て（nondesu と被らせない）
+
+| ポート | 所有者 | 用途 | 固定方法（babytatolink） |
+|--------|--------|------|--------------------------|
+| `:4321` | **nondesu** | Astro `npm run dev`（Astro デフォルト） | —（触らない） |
+| `:4322` | **babytatolink** | Astro `bun run dev`（SITE iframe） | `--port 4322 --strictPort` |
+| `:8788` | **babytatolink** | `bun run pages:dev`（admin / Functions） | `--port 8788 --ip 127.0.0.1` |
+
+nondesu の `pages:dev` はスクリプト上ポート未指定（wrangler デフォルトも 8788 寄り）。両方同時に `pages:dev` しない。Astro 同士は 4321 / 4322 で分離済み。
 
 ## Site Studio
 

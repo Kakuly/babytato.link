@@ -70,7 +70,7 @@ Keep mask transitions on both closed and open states (same property, different s
 
 ## Verify after any holo edit
 
-1. `bun run dev -- --port 4322`
+1. `bun run dev`（`:4322` 固定）
 2. **Closed:** character glows with holo rainbow; no black box around figure
 3. **Open:** illust fades at bottom; profile text appears; illust stays top-aligned
 4. Compare with a known-good screenshot if unsure

@@ -302,7 +302,7 @@ Kakuly 用 SITE ハブから admin iframe を開くとき、毎回手入力を�
 
 ```bash
 # /etc/hosts に追加: 127.0.0.1 manage.babytato.link
-bun run pages:dev -- --ip 127.0.0.1 --port 8788
+bun run pages:dev
 # ブラウザ: http://manage.babytato.link:8788/
 ```
 

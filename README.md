@@ -44,8 +44,19 @@ RSS はチャンネルごとに最新 15 本まで。
 
 ```bash
 bun install
-bun run dev
+bun run dev          # http://127.0.0.1:4322 （strictPort）
+bun run build && bun run pages:dev   # http://127.0.0.1:8788 （admin / Functions）
 ```
+
+### ローカルポート（nondesu と分離）
+
+| ポート | プロジェクト | コマンド |
+|--------|--------------|----------|
+| `:4321` | nondesu | `npm run dev`（Astro デフォルト） |
+| `:4322` | **babytatolink** | `bun run dev`（`--port 4322 --strictPort` 固定） |
+| `:8788` | **babytatolink** | `bun run pages:dev`（`--port 8788 --ip 127.0.0.1` 固定） |
+
+nondesu の `pages:dev` はポート未指定のため、同時起動すると 8788 でぶつかりうる。Astro は 4321 / 4322 で両立できる。
 
 ## デプロイ
 
