@@ -1,4 +1,13 @@
 {
-  "collabo": [],
+  "collabo": [
+    {
+      "id": "direct-loop",
+      "title": "DIRECT & LOOP",
+      "type": "album",
+      "img": "/releases/direct-loop.png",
+      "date": "2025-08-05",
+      "url": "https://big-up.style/AwGSfnO9I3"
+    }
+  ],
   "myReleases": []
 }
