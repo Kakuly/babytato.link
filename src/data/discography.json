@@ -1,6 +1,14 @@
 {
   "collabo": [
     {
+      "id": "snowflaking",
+      "title": "snowflaking",
+      "type": "ep",
+      "img": "/releases/snowflaking.png",
+      "date": "2025-12-26",
+      "url": "https://big-up.style/21Wcz2jUF8"
+    },
+    {
       "id": "direct-loop",
       "title": "DIRECT & LOOP",
       "type": "album",
