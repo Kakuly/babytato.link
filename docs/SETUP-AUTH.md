@@ -207,23 +207,24 @@ openssl rand -base64 32
 
 お知らせ**本文**は GitHub ではなく **D1**。admin で保存した時点で `GET /api/news` が新内容を返し、ホームは再デプロイなしで更新されます。links / discography / お問い合わせ webhook は従来どおり。
 
-`wrangler.toml` に D1 枠は入れてあります。**R2 `MEDIA` はバケット未作成だと Function publish が失敗するため、既定ではコメントアウト**（画像は GitHub `public/news/` フォールバック）。本番では Dashboard で実リソースを接続してください（リモート `d1 create` は `CLOUDFLARE_API_TOKEN` があれば実行可。無ければ Dashboard から作れます）。
+**D1 / R2 は `wrangler.toml` では既定コメントアウト**（未作成の ID / バケットを書くと Pages の Function publish が失敗するため）。本番の News は **Dashboard Bindings** で接続します（CLI の `d1 create` は任意。無ければ Dashboard から作成可）。R2 未接続時は画像は GitHub `public/news/` フォールバック。
 
 ```bash
+# 任意（Dashboard から作成してもよい）:
 npx wrangler d1 create babytato-news
 # R2 を使うときだけ:
 npx wrangler r2 bucket create babytato-news-media
 ```
 
-1. `wrangler d1 create` が出す **database_id** を `wrangler.toml` の `[[d1_databases]]` に貼る（ローカル用プレースホルダ `00000000-0000-4000-8000-000000000001` を差し替え）
-2. Dashboard → **Workers & Pages** → **`babytato-link`** → **Settings** → **Bindings**
+1. Dashboard → **Workers & Pages** → **`babytato-link`** → **Settings** → **Bindings**
    - **D1**: 変数名 `DB` → データベース `babytato-news`
    - **R2（任意）**: バケット作成後、`wrangler.toml` の `[[r2_buckets]]` をアンコメントし、変数名 `MEDIA` → `babytato-news-media` を接続
-3. Production / Preview の両方に付ける
+2. **Production** と **Preview** の両方に付ける（必須。未接続だとデプロイは通るが `/api/news` が 500）
+3. （任意）`wrangler d1 create` の **database_id** を `wrangler.toml` の `[[d1_databases]]` に貼ってアンコメント（Dashboard 接続だけでも本番は動く）
 4. スキーマは Function が初回リクエストで `CREATE TABLE IF NOT EXISTS`（空 DB なら `src/content/news/*.md` 相当をシード）
 5. 任意: `npx wrangler d1 execute babytato-news --file=migrations/0001_posts.sql --remote`
 
-**ローカル:** `bun run build && bun run pages:dev`（`:8788`）。`wrangler.toml` のプレースホルダ ID のままでも miniflare がローカル D1 を立てます。ホームを `bun run dev`（`:4322`）で見る場合は、`/api/news` が Vite proxy 経由で `:8788` に届くので **pages:dev も同時起動**してください（SITE iframe も同様）。
+**ローカル:** `bun run build && bun run pages:dev`（`:8788`）。`pages:dev` は `--d1=DB` でローカル D1 を立てます（toml のリモート binding 不要）。ホームを `bun run dev`（`:4322`）で見る場合は、`/api/news` が Vite proxy 経由で `:8788` に届くので **pages:dev も同時起動**してください（SITE iframe も同様。推奨: `bun run site:dev`）。
 
 **画像:** `MEDIA` があれば R2 → `GET /api/news/media/:key`（デプロイ不要）。未接続なら GitHub `public/news/`（こちらは Pages 再ビルドが走る）。
 
@@ -369,5 +370,5 @@ bun run pages:dev
 | `functions/_middleware.ts` | `manage.babytato.link` のホストベースルーティング |
 | `functions/lib/manage-host.ts` | manage ホスト判定 |
 | `src/lib/admin-paths.ts` | クライアント側の admin URL 解決 |
-| `wrangler.toml` | Pages 設定 · D1 `DB` · R2 `MEDIA`（任意・既定オフ） |
+| `wrangler.toml` | Pages 設定 · D1/R2 は既定オフ（Dashboard Bindings で本番接続） |
 | `.github/workflows/deploy.yml` | GitHub Actions 本番デプロイ |

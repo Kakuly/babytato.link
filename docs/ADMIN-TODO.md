@@ -118,10 +118,11 @@ npx wrangler d1 create babytato-news
 npx wrangler r2 bucket create babytato-news-media
 ```
 
-- [ ] D1 `babytato-news` を作成し、Pages の **Bindings** で変数名 **`DB`** に接続
-- [ ] `wrangler.toml` の `database_id` を実 ID に更新（任意だが推奨）
+- [ ] D1 `babytato-news` を作成し、Pages の **Bindings** で変数名 **`DB`** に接続（Production + Preview）
+- [ ] （任意）`wrangler.toml` の `[[d1_databases]]` を実 ID でアンコメント（未作成だと Pages Function publish が失敗するため既定オフ）
 - [ ] （任意）R2 `babytato-news-media` を作成 → `wrangler.toml` の `[[r2_buckets]]` をアンコメント → 変数名 **`MEDIA`** に接続（未接続なら GitHub `public/news/`）
 - [ ] Production / Preview 両方。詳細は [`SETUP-AUTH.md`](./SETUP-AUTH.md) §4b
+- ローカル News: `pages:dev` は `--d1=DB`（toml 不要）
 
 ---
 

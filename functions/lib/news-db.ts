@@ -4,7 +4,7 @@ import type { NewsArticle, NewsListItem } from "./news";
 import { NEWS_SEED } from "./news-seed";
 
 export const DB_MISSING_MESSAGE =
-  "D1 (DB) が未設定です。wrangler.toml の babytato-news を Dashboard の Bindings に接続してください。";
+  "D1 (DB) が未設定です。Dashboard で babytato-news を作成し、Bindings で変数名 DB を接続してください。";
 
 interface PostRow {
   slug: string;
