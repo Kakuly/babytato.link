@@ -44,7 +44,7 @@ export async function onRequestPut(context: ContentContext): Promise<Response> {
   const payload = body && typeof body === "object" ? (body as Record<string, unknown>) : null;
   const links = validateSocialLinksInput(payload?.links ?? payload);
   if (!links) {
-    return jsonError("各 SNS の URL を https:// または # で入力してください。");
+    return jsonError("各 SNS は空欄（非表示）か https:// で始まる URL を入力してください。");
   }
 
   try {

@@ -1,41 +1,54 @@
 ---
 import AdminLayout from "../../../layouts/AdminLayout.astro";
 import { adminDashboardPath } from "../../../lib/admin-paths";
+import { socialIconSvg } from "../../../lib/social-icons";
+import type { SocialPlatform } from "../../../data/links";
+
+const TEMPLATES: { id: SocialPlatform; label: string; placeholder: string }[] = [
+  { id: "x", label: "X", placeholder: "https://x.com/…" },
+  { id: "instagram", label: "Instagram", placeholder: "https://www.instagram.com/…" },
+  { id: "youtube", label: "YouTube", placeholder: "https://www.youtube.com/@…" },
+  { id: "soundcloud", label: "SoundCloud", placeholder: "https://soundcloud.com/…" },
+  { id: "tiktok", label: "TikTok", placeholder: "https://www.tiktok.com/@…" },
+  { id: "fanbox", label: "FANBOX", placeholder: "https://….fanbox.cc/" },
+  { id: "booth", label: "BOOTH", placeholder: "https://….booth.pm/" },
+  { id: "spotify", label: "Spotify", placeholder: "https://open.spotify.com/…" },
+  { id: "appleMusic", label: "Apple Music", placeholder: "https://music.apple.com/…" },
+  { id: "bandcamp", label: "Bandcamp", placeholder: "https://….bandcamp.com" },
+  { id: "discord", label: "Discord", placeholder: "https://discord.gg/…" },
+];
 ---
 
 <AdminLayout title="links">
   <section class="admin-card">
     <p class="admin-back">
-      <a class="admin-btn" href={adminDashboardPath()}>←戻る</a>
+      <a href={adminDashboardPath()}>← dashboard</a>
     </p>
     <h2 class="admin-card-title">SNS links</h2>
-    <p class="admin-hint">公開サイトの SNS リンクを編集します。未設定の場合は <code>#</code> を入力してください。</p>
+    <p class="admin-hint">
+      公開サイトに出す公式リンクです。URL を入れると表示、空欄のままなら非表示。保存すると GitHub に commit され、Pages が再ビルドします。
+    </p>
 
-    <form id="links-form" class="admin-grid">
-      <div class="admin-field">
-        <label for="link-x">X</label>
-        <input id="link-x" name="x" type="text" inputmode="url" autocomplete="off" spellcheck="false" required />
-      </div>
-      <div class="admin-field">
-        <label for="link-youtube">YouTube</label>
-        <input id="link-youtube" name="youtube" type="text" inputmode="url" autocomplete="off" spellcheck="false" required />
-      </div>
-      <div class="admin-field">
-        <label for="link-niconico">ニコニコ</label>
-        <input id="link-niconico" name="niconico" type="text" inputmode="url" autocomplete="off" spellcheck="false" required />
-      </div>
-      <div class="admin-field">
-        <label for="link-soundcloud">SoundCloud</label>
-        <input id="link-soundcloud" name="soundcloud" type="text" inputmode="url" autocomplete="off" spellcheck="false" required />
-      </div>
-      <div class="admin-field">
-        <label for="link-spotify">Spotify</label>
-        <input id="link-spotify" name="spotify" type="text" inputmode="url" autocomplete="off" spellcheck="false" required />
-      </div>
-      <div class="admin-field">
-        <label for="link-appleMusic">Apple Music</label>
-        <input id="link-appleMusic" name="appleMusic" type="text" inputmode="url" autocomplete="off" spellcheck="false" required />
-      </div>
+    <form id="links-form" class="admin-links-list">
+      {
+        TEMPLATES.map((t) => (
+          <div class="admin-link-row">
+            <span class="admin-link-row__icon" set:html={socialIconSvg(t.id)} aria-hidden="true" />
+            <div class="admin-field">
+              <label for={`link-${t.id}`}>{t.label}</label>
+              <input
+                id={`link-${t.id}`}
+                name={t.id}
+                type="text"
+                inputmode="url"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder={t.placeholder}
+              />
+            </div>
+          </div>
+        ))
+      }
 
       <div class="admin-actions">
         <button type="submit" class="admin-btn admin-btn-primary" id="links-save">save</button>
@@ -50,14 +63,21 @@ import { adminDashboardPath } from "../../../lib/admin-paths";
 <script>
   import { requireSession, showStatus } from "../../../scripts/admin/client";
 
-  type SocialLinks = {
-    x: string;
-    youtube: string;
-    niconico: string;
-    soundcloud: string;
-    spotify: string;
-    appleMusic: string;
-  };
+  const PLATFORM_KEYS = [
+    "x",
+    "instagram",
+    "youtube",
+    "soundcloud",
+    "tiktok",
+    "fanbox",
+    "booth",
+    "spotify",
+    "appleMusic",
+    "bandcamp",
+    "discord",
+  ] as const;
+
+  type SocialLinks = Record<(typeof PLATFORM_KEYS)[number], string>;
 
   const form = document.getElementById("links-form") as HTMLFormElement | null;
   const statusEl = document.getElementById("links-status");
@@ -70,12 +90,26 @@ import { adminDashboardPath } from "../../../lib/admin-paths";
     if (reloadBtn instanceof HTMLButtonElement) reloadBtn.disabled = loading;
   }
 
+  function emptyLinks(): SocialLinks {
+    return Object.fromEntries(PLATFORM_KEYS.map((k) => [k, ""])) as SocialLinks;
+  }
+
   function fillForm(links: SocialLinks) {
     if (!form) return;
-    for (const [key, value] of Object.entries(links)) {
+    for (const key of PLATFORM_KEYS) {
       const input = form.elements.namedItem(key) as HTMLInputElement | null;
-      if (input) input.value = value;
+      if (input) input.value = links[key] ?? "";
     }
+  }
+
+  function readForm(): SocialLinks {
+    const links = emptyLinks();
+    if (!form) return links;
+    for (const key of PLATFORM_KEYS) {
+      const input = form.elements.namedItem(key) as HTMLInputElement | null;
+      links[key] = (input?.value ?? "").trim();
+    }
+    return links;
   }
 
   async function loadLinks() {
@@ -97,7 +131,7 @@ import { adminDashboardPath } from "../../../lib/admin-paths";
       }
 
       fileSha = data.sha ?? "";
-      fillForm(data.links);
+      fillForm({ ...emptyLinks(), ...data.links });
       showStatus(statusEl, "読み込み完了", "success");
     } catch (error) {
       const message = error instanceof Error ? error.message : "読み込みに失敗しました。";
@@ -111,12 +145,19 @@ import { adminDashboardPath } from "../../../lib/admin-paths";
     event.preventDefault();
     if (!form) return;
 
+    const links = readForm();
+    for (const key of PLATFORM_KEYS) {
+      const value = links[key];
+      if (value && !/^https?:\/\//i.test(value)) {
+        showStatus(statusEl, `${key}: https:// で始まる URL を入力してください（空欄で非表示）。`, "error");
+        statusEl?.classList.add("is-visible");
+        return;
+      }
+    }
+
     setLoading(true);
     showStatus(statusEl, "保存中…", "success");
     statusEl?.classList.add("is-visible");
-
-    const formData = new FormData(form);
-    const links = Object.fromEntries(formData.entries()) as SocialLinks;
 
     try {
       const response = await fetch("/api/admin/content/links", {
@@ -136,7 +177,7 @@ import { adminDashboardPath } from "../../../lib/admin-paths";
         throw new Error(data.message ?? "保存に失敗しました。");
       }
 
-      if (data.links) fillForm(data.links);
+      if (data.links) fillForm({ ...emptyLinks(), ...data.links });
       fileSha = data.sha ?? fileSha;
       showStatus(statusEl, data.message ?? "保存しました。", "success");
     } catch (error) {
@@ -164,8 +205,42 @@ import { adminDashboardPath } from "../../../lib/admin-paths";
 </script>
 
 <style>
+  .admin-back {
+    margin: 0 0 var(--space-2);
+    font-size: 0.88rem;
+  }
+
   .admin-hint code {
     font-family: var(--font-mono);
     font-size: 0.85em;
+  }
+
+  .admin-links-list {
+    display: grid;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+
+  .admin-link-row {
+    display: grid;
+    grid-template-columns: 1.75rem minmax(0, 1fr);
+    gap: 0.85rem;
+    align-items: start;
+  }
+
+  .admin-link-row__icon {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-top: 1.85rem;
+    color: var(--ink);
+  }
+
+  .admin-link-row__icon :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
   }
 </style>
