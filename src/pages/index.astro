@@ -76,20 +76,18 @@ const motto = 'やりたいことを、やりたいだけやる';
     <section class="base">
       <h2 class="base__banner">{motto}</h2>
       <p class="base__num">729</p>
-      <div class="base__frame" aria-hidden="true"></div>
       <div class="base__links">
         <SocialLinkGrid />
         <Barcode value="tato official" class="base__bar" />
       </div>
-    </section>
-
-    <section class="home-block" id="news">
-      <header class="home-block__head">
-        <h2 class="home-block__title">news</h2>
-        <p class="home-block__kicker">updates</p>
-      </header>
-      <div class="home-block__body">
-        <NewsList />
+      <div class="base__frame" id="news">
+        <header class="base__news-head">
+          <h2 class="base__news-title">news</h2>
+          <p class="base__news-kicker">updates</p>
+        </header>
+        <div class="base__news-body">
+          <NewsList />
+        </div>
       </div>
     </section>
 
@@ -450,10 +448,10 @@ const motto = 'やりたいことを、やりたいだけやる';
 
   .base {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-areas:
-      'banner num'
-      'frame links';
+      'banner banner num'
+      'links frame frame';
     gap: 0;
     margin: 0;
     border-top: 2px solid var(--line);
@@ -493,16 +491,12 @@ const motto = 'やりたいことを、やりたいだけやる';
     -webkit-text-stroke: 1.5px var(--ink);
   }
 
-  .base__frame {
-    grid-area: frame;
-    border-right: 2px solid var(--line);
-  }
-
   .base__links {
     grid-area: links;
     display: grid;
     align-content: start;
     min-width: 12.5rem;
+    border-right: 2px solid var(--line);
   }
 
   .base__links :global(.social-grid) {
@@ -514,6 +508,62 @@ const motto = 'やりたいことを、やりたいだけやる';
     height: 3.2rem;
     padding: 0.55rem 0.8rem 0.4rem;
     color: var(--ink);
+  }
+
+  .base__frame {
+    grid-area: frame;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-width: 0;
+    scroll-margin-top: 0.75rem;
+  }
+
+  .base__news-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    border-bottom: 2px solid var(--line);
+  }
+
+  .base__news-title {
+    margin: 0;
+    padding: 0.65rem 1rem 0.55rem;
+    border-right: 2px solid var(--line);
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 2.8vw, 1.45rem);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    line-height: 1.15;
+    text-transform: lowercase;
+    color: transparent;
+    -webkit-text-stroke: 1.1px var(--ink);
+  }
+
+  .base__news-kicker {
+    display: grid;
+    place-items: center;
+    margin: 0;
+    min-width: 6.5rem;
+    padding: 0.35rem 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .base__news-body {
+    min-width: 0;
+    max-width: 100%;
+    padding: 0.9rem 1rem 1.15rem;
+    overflow-x: clip;
+  }
+
+  .base__news-body :global(.home-news-root :is(.news-item__title)) {
+    font-size: 0.9rem;
+  }
+
+  .base__news-body :global(.home-news-root :is(.news-item__summary, .news-item__prose)) {
+    font-size: 0.8rem;
   }
 
   .home-block {
@@ -620,21 +670,38 @@ const motto = 'やりたいことを、やりたいだけやる';
       grid-template-areas:
         'banner'
         'num'
-        'links';
+        'links'
+        'frame';
     }
 
     .base__banner {
       border-right: 0;
     }
 
-    .base__frame {
-      display: none;
+    .base__links {
+      border-right: 0;
+      border-bottom: 2px solid var(--line);
     }
 
     .base__num {
       min-width: 0;
       justify-items: start;
       padding-left: 1.15rem;
+    }
+
+    .base__news-title {
+      border-right: 0;
+    }
+
+    .base__news-kicker {
+      min-width: 0;
+      justify-items: start;
+      padding-left: 1rem;
+      border-top: 2px solid var(--line);
+    }
+
+    .base__news-head {
+      grid-template-columns: 1fr;
     }
 
     .home-block__title {
