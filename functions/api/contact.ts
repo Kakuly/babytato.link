@@ -5,6 +5,13 @@ interface ContactContext {
   env: PagesEnv;
 }
 
+interface ContactPayload {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
 const WINDOW_MS = 5 * 60 * 1000;
 const MAX_REQUESTS = 5;
 const rateBuckets = new Map<string, number[]>();
@@ -80,12 +87,7 @@ function isDiscordWebhook(url: string): boolean {
   return /discord(?:app)?\.com\/api\/webhooks/i.test(url);
 }
 
-function formatWebhookText(payload: {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-}): string {
+function formatWebhookText(payload: ContactPayload): string {
   const subject = payload.subject || "（なし）";
   const header = [
     "[babytato.link] お問い合わせ",
@@ -103,6 +105,104 @@ function formatWebhookText(payload: {
       : payload.message;
 
   return `${header}${message}`;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function formatEmailSubject(payload: ContactPayload): string {
+  const subject = payload.subject || "（件名なし）";
+  return `[babytato.link] ${subject}`;
+}
+
+function formatEmailText(payload: ContactPayload): string {
+  const subject = payload.subject || "（なし）";
+  return [
+    "[babytato.link] お問い合わせ",
+    "",
+    `お名前: ${payload.name}`,
+    `メール: ${payload.email}`,
+    `件名: ${subject}`,
+    "",
+    payload.message,
+  ].join("\n");
+}
+
+function formatEmailHtml(payload: ContactPayload): string {
+  const subject = payload.subject || "（なし）";
+  return [
+    "<p><strong>[babytato.link] お問い合わせ</strong></p>",
+    `<p>お名前: ${escapeHtml(payload.name)}<br>`,
+    `メール: ${escapeHtml(payload.email)}<br>`,
+    `件名: ${escapeHtml(subject)}</p>`,
+    `<pre style="white-space:pre-wrap;font-family:inherit">${escapeHtml(payload.message)}</pre>`,
+  ].join("\n");
+}
+
+function resendConfigured(env: PagesEnv): boolean {
+  return Boolean(
+    env.RESEND_API_KEY?.trim() &&
+      env.RESEND_FROM?.trim() &&
+      env.CONTACT_TO_EMAIL?.trim(),
+  );
+}
+
+async function sendViaResend(
+  env: PagesEnv,
+  payload: ContactPayload,
+): Promise<{ ok: true } | { ok: false; status: number; detail: string }> {
+  const apiKey = env.RESEND_API_KEY!.trim();
+  const from = env.RESEND_FROM!.trim();
+  const to = env.CONTACT_TO_EMAIL!.trim();
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [to],
+      reply_to: payload.email,
+      subject: formatEmailSubject(payload),
+      text: formatEmailText(payload),
+      html: formatEmailHtml(payload),
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    return { ok: false, status: response.status, detail };
+  }
+
+  return { ok: true };
+}
+
+async function sendViaWebhook(
+  webhookUrl: string,
+  payload: ContactPayload,
+): Promise<{ ok: true } | { ok: false; status: number; detail: string }> {
+  const text = formatWebhookText(payload);
+  const body = isDiscordWebhook(webhookUrl) ? { content: text } : { text };
+
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    return { ok: false, status: response.status, detail };
+  }
+
+  return { ok: true };
 }
 
 export async function onRequestOptions(context: ContactContext): Promise<Response> {
@@ -168,8 +268,11 @@ export async function onRequestPost(context: ContactContext): Promise<Response> 
     );
   }
 
+  const payload: ContactPayload = { name, email, subject, message };
+  const useResend = resendConfigured(env);
   const webhookUrl = env.CONTACT_WEBHOOK_URL?.trim();
-  if (!webhookUrl) {
+
+  if (!useResend && !webhookUrl) {
     return jsonResponse(
       request,
       { ok: false, message: "お問い合わせの受付設定が完了していません。" },
@@ -177,29 +280,30 @@ export async function onRequestPost(context: ContactContext): Promise<Response> 
     );
   }
 
-  const text = formatWebhookText({ name, email, subject, message });
-  const payload = isDiscordWebhook(webhookUrl)
-    ? { content: text }
-    : { text };
-
   try {
-    const webhookResponse = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!webhookResponse.ok) {
-      const detail = await webhookResponse.text().catch(() => "");
-      console.error("contact webhook failed", webhookResponse.status, detail.slice(0, 200));
-      return jsonResponse(
-        request,
-        { ok: false, message: "送信に失敗しました。しばらくしてから再度お試しください。" },
-        502,
-      );
+    if (useResend) {
+      const result = await sendViaResend(env, payload);
+      if (!result.ok) {
+        console.error("contact resend failed", result.status, result.detail.slice(0, 200));
+        return jsonResponse(
+          request,
+          { ok: false, message: "送信に失敗しました。しばらくしてから再度お試しください。" },
+          502,
+        );
+      }
+    } else {
+      const result = await sendViaWebhook(webhookUrl!, payload);
+      if (!result.ok) {
+        console.error("contact webhook failed", result.status, result.detail.slice(0, 200));
+        return jsonResponse(
+          request,
+          { ok: false, message: "送信に失敗しました。しばらくしてから再度お試しください。" },
+          502,
+        );
+      }
     }
   } catch (error) {
-    console.error("contact webhook error", error);
+    console.error("contact delivery error", error);
     return jsonResponse(
       request,
       { ok: false, message: "送信に失敗しました。しばらくしてから再度お試しください。" },

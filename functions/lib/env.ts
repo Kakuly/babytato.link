@@ -47,8 +47,14 @@ export interface PagesEnv {
   SESSION_SECRET?: string;
   /** Local dev only: auto-login username for SITE iframe workflow (127.0.0.1 / localhost). */
   DEV_AUTO_LOGIN_USER?: string;
-  /** Discord / Slack incoming webhook for the public inquiry form. */
+  /** Discord / Slack incoming webhook for the public inquiry form (fallback). */
   CONTACT_WEBHOOK_URL?: string;
+  /** Resend API key — preferred delivery for the public inquiry form. */
+  RESEND_API_KEY?: string;
+  /** Verified Resend From address, e.g. `tato <noreply@babytato.link>`. */
+  RESEND_FROM?: string;
+  /** Inbox that receives inquiry form emails. */
+  CONTACT_TO_EMAIL?: string;
 }
 
 export function githubRepo(env: PagesEnv): string {

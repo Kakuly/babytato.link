@@ -32,11 +32,14 @@ RSS はチャンネルごとに最新 15 本まで。
 ## お問い合わせ
 
 ホーム下部 `#contact` のフォームは `POST /api/contact`（Cloudflare Pages Function）へ送信します。  
-本番では Pages の **Environment variables** に Incoming Webhook を 1 本設定します。
+本番では Pages の **Environment variables** に次を設定します（**Resend 優先**。未設定なら Webhook）。
 
-| 変数 | 内容 |
-|------|------|
-| `CONTACT_WEBHOOK_URL` | Discord または Slack の Incoming Webhook URL |
+| 変数（ラベル名） | 内容 |
+|------------------|------|
+| `RESEND_API_KEY` | [Resend](https://resend.com/) の API Key（`re_…`） |
+| `RESEND_FROM` | 検証済み送信元。例: `tato <noreply@babytato.link>` |
+| `CONTACT_TO_EMAIL` | 受付先メール（任意の受信アドレス） |
+| `CONTACT_WEBHOOK_URL` | （任意）Discord / Slack Incoming Webhook。Resend 未設定時のフォールバック |
 
 ローカルは `.dev.vars.example` をコピーした `.dev.vars` に同じ変数を置きます。`astro dev`（`:4322`）の `/api/*` は Vite proxy で `pages:dev`（`:8788`）へ転送するので、**両方起動**してください（推奨: `bun run site:dev`）。
 
