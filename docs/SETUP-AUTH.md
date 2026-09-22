@@ -222,7 +222,7 @@ npx wrangler r2 bucket create babytato-news-media
 4. スキーマは Function が初回リクエストで `CREATE TABLE IF NOT EXISTS`（空 DB なら `src/content/news/*.md` 相当をシード）
 5. 任意: `npx wrangler d1 execute babytato-news --file=migrations/0001_posts.sql --remote`
 
-**ローカル:** `bun run build && bun run pages:dev`（`:8788`）。`wrangler.toml` のプレースホルダ ID のままでも miniflare がローカル D1 を立てます。ホームを `bun run dev`（`:4322`）で見る場合は、news が `http://127.0.0.1:8788/api/news` を叩くので **pages:dev も同時起動**してください。
+**ローカル:** `bun run build && bun run pages:dev`（`:8788`）。`wrangler.toml` のプレースホルダ ID のままでも miniflare がローカル D1 を立てます。ホームを `bun run dev`（`:4322`）で見る場合は、`/api/news` が Vite proxy 経由で `:8788` に届くので **pages:dev も同時起動**してください（SITE iframe も同様）。
 
 **画像:** `MEDIA` があれば R2 → `GET /api/news/media/:key`（デプロイ不要）。未接続なら GitHub `public/news/`（こちらは Pages 再ビルドが走る）。
 

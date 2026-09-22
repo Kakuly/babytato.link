@@ -83,14 +83,6 @@
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  function contactApiUrl(): string {
-    const { hostname, port } = window.location;
-    if ((hostname === '127.0.0.1' || hostname === 'localhost') && port === '4322') {
-      return 'http://127.0.0.1:8788/api/contact';
-    }
-    return '/api/contact';
-  }
-
   function cleanField(value: string | null | undefined, maxLen: number): string {
     return String(value ?? '')
       .trim()
@@ -147,7 +139,8 @@
     setStatus('送信中…');
 
     try {
-      const response = await fetch(contactApiUrl(), {
+      // Local Astro (:4322) proxies /api → pages:dev (:8788) via astro.config.
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

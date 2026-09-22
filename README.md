@@ -38,7 +38,7 @@ RSS はチャンネルごとに最新 15 本まで。
 |------|------|
 | `CONTACT_WEBHOOK_URL` | Discord または Slack の Incoming Webhook URL |
 
-ローカルは `.dev.vars.example` をコピーした `.dev.vars` に同じ変数を置きます。`astro dev`（`:4322`）からの送信は `pages:dev`（`:8788`）へ転送します。
+ローカルは `.dev.vars.example` をコピーした `.dev.vars` に同じ変数を置きます。`astro dev`（`:4322`）の `/api/*` は Vite proxy で `pages:dev`（`:8788`）へ転送するので、**両方起動**してください。
 
 ## お知らせ（即時公開）
 

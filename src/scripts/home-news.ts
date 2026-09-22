@@ -10,24 +10,6 @@ type PublicNewsArticle = {
 
 marked.setOptions({ gfm: true, breaks: true });
 
-function newsApiUrl(): string {
-  const { hostname, port } = window.location;
-  if ((hostname === "127.0.0.1" || hostname === "localhost") && port === "4322") {
-    return "http://127.0.0.1:8788/api/news";
-  }
-  return "/api/news";
-}
-
-function isLocalAstro(): boolean {
-  const { hostname, port } = window.location;
-  return (hostname === "127.0.0.1" || hostname === "localhost") && port === "4322";
-}
-
-function rewriteMediaUrls(html: string): string {
-  if (!isLocalAstro()) return html;
-  return html.replaceAll('src="/api/news/media/', 'src="http://127.0.0.1:8788/api/news/media/');
-}
-
 function formatDate(value: string): string {
   const [year, month, day] = value.split("-");
   if (!year || !month || !day) return value;
@@ -44,7 +26,7 @@ function sanitizeHtml(html: string): string {
 function renderBody(markdown: string): string {
   const parsed = marked.parse(markdown || "", { async: false });
   const html = typeof parsed === "string" ? parsed : "";
-  return rewriteMediaUrls(sanitizeHtml(html));
+  return sanitizeHtml(html);
 }
 
 function setStatus(
@@ -107,7 +89,8 @@ export function initHomeNews(root: ParentNode = document): void {
 
   void (async () => {
     try {
-      const response = await fetch(newsApiUrl(), { credentials: "omit" });
+      // Local Astro (:4322) proxies /api → pages:dev (:8788) via astro.config.
+      const response = await fetch("/api/news", { credentials: "omit" });
       const data = (await response.json()) as {
         ok?: boolean;
         articles?: PublicNewsArticle[];
