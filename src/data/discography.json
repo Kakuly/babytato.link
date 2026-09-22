@@ -1,6 +1,14 @@
 {
   "collabo": [
     {
+      "id": "gucha",
+      "title": "gucha!",
+      "type": "single",
+      "img": "/releases/gucha.jpg",
+      "date": "2026-03-25",
+      "url": "https://theluvbugs.lnk.to/gucha"
+    },
+    {
       "id": "snowflaking",
       "title": "snowflaking",
       "type": "ep",
