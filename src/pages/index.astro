@@ -485,8 +485,10 @@ const motto = 'やりたいことを、やりたいだけやる';
     font-weight: 900;
     letter-spacing: 0.06em;
     line-height: 1.2;
-    color: transparent;
-    -webkit-text-stroke: 1.15px var(--ink);
+    /* Solid fill — outline stroke makes CJK look like mojibake */
+    color: var(--ink);
+    -webkit-text-fill-color: var(--ink);
+    -webkit-text-stroke: 0;
   }
 
   .base__num {

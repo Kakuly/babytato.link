@@ -29,6 +29,16 @@ function authHeaders(token: string): HeadersInit {
   };
 }
 
+/** Decode GitHub Contents API base64 as UTF-8 (atob alone latin1-mangles CJK). */
+function decodeBase64Utf8(b64: string): string {
+  const binary = atob(b64.replace(/\n/g, ""));
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new TextDecoder("utf-8").decode(bytes);
+}
+
 export async function readGitHubFile(env: PagesEnv, path: string): Promise<GitHubFile | null> {
   const token = env.GITHUB_TOKEN?.trim();
   const repo = githubRepo(env);
@@ -44,7 +54,7 @@ export async function readGitHubFile(env: PagesEnv, path: string): Promise<GitHu
     }
     const data = (await response.json()) as GitHubContentsResponse;
     if (!data.content || !data.sha) throw new Error("GitHub response missing content or sha.");
-    const content = atob(data.content.replace(/\n/g, ""));
+    const content = decodeBase64Utf8(data.content);
     return { path, content, sha: data.sha };
   }
 
@@ -113,7 +123,7 @@ export async function writeGitHubFile(
   sha: string | undefined,
   message: string,
 ): Promise<{ sha: string }> {
-  return putGitHubContent(env, path, btoa(unescape(encodeURIComponent(content))), sha, message);
+  return putGitHubContent(env, path, uint8ToBase64(new TextEncoder().encode(content)), sha, message);
 }
 
 export async function writeGitHubBinaryFile(

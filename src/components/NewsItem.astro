@@ -43,6 +43,9 @@ const formattedDate = date.toLocaleDateString('ja-JP', {
   .title {
     margin: 0.25rem 0 0;
     color: var(--ink);
+    -webkit-text-fill-color: var(--ink);
+    -webkit-text-stroke-width: 0;
+    -webkit-text-stroke-color: transparent;
     -webkit-text-stroke: 0;
     font-family: var(--font);
     font-size: 0.95rem;
@@ -56,6 +59,8 @@ const formattedDate = date.toLocaleDateString('ja-JP', {
   .summary {
     margin: 0.4rem 0 0;
     color: var(--muted);
+    -webkit-text-fill-color: var(--muted);
+    -webkit-text-stroke: 0;
     font-family: var(--font);
     font-size: 0.82rem;
     line-height: 1.6;
@@ -65,6 +70,9 @@ const formattedDate = date.toLocaleDateString('ja-JP', {
 
   .prose {
     min-width: 0;
+    color: var(--ink);
+    -webkit-text-fill-color: var(--ink);
+    -webkit-text-stroke: 0;
     overflow-wrap: anywhere;
     word-break: break-word;
   }
