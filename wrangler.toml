@@ -38,11 +38,11 @@ pages_build_output_dir = "./dist"
 # R2 有効化: npx wrangler r2 bucket create babytato-news-media
 #            → 下記 [[r2_buckets]] をアンコメント → Dashboard で MEDIA を接続
 
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "babytato-news"
-# database_id = "<paste-from-wrangler-d1-create>"
-# migrations_dir = "migrations"
+[[d1_databases]]
+binding = "DB"
+database_name = "babytato-news"
+database_id = "d06c5baa-9f14-4ed1-92dd-8068a9305eae"
+migrations_dir = "migrations"
 
 # [[r2_buckets]]
 # binding = "MEDIA"
