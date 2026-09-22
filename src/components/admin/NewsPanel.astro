@@ -1,0 +1,21 @@
+---
+import { adminNewsEditPath } from "../../lib/admin-paths";
+---
+
+<section class="admin-card">
+  <h2 class="admin-card-title">news</h2>
+  <p class="admin-hint">お知らせ記事の一覧です。保存は D1 に即時反映され、公開サイトの再デプロイは不要です。下書きは公開されません。</p>
+
+  <div class="admin-actions admin-actions--inline">
+    <a class="admin-btn admin-btn-primary" href={adminNewsEditPath()}>new article</a>
+    <button type="button" class="admin-btn" id="news-reload">reload</button>
+  </div>
+
+  <div id="news-list-wrap" class="admin-news-list-wrap">
+    <p id="news-list-loading" class="admin-loading">loading…</p>
+    <ul id="news-list" class="admin-news-list" hidden></ul>
+    <p id="news-list-empty" class="admin-hint" hidden>記事がありません。</p>
+  </div>
+
+  <p id="news-status" class="admin-status" aria-live="polite"></p>
+</section>

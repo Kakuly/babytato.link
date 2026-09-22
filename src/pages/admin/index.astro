@@ -1,54 +1,108 @@
 ---
 import AdminLayout from "../../layouts/AdminLayout.astro";
-import { adminDiscographyPath, adminLinksPath, adminNewsPath } from "../../lib/admin-paths";
+import NewsPanel from "../../components/admin/NewsPanel.astro";
+import LinksPanel from "../../components/admin/LinksPanel.astro";
+import DiscographyPanel from "../../components/admin/DiscographyPanel.astro";
 ---
 
-<AdminLayout>
-  <section class="admin-card admin-dashboard">
-    <h2 class="admin-card-title">edit</h2>
-    <p class="admin-hint">news は保存直後に公開されます。links / discography は GitHub に commit され、Pages が再ビルドします。</p>
-    <ul class="admin-nav-grid" aria-label="編集メニュー">
-      <li>
-        <a class="admin-nav-tile" href="https://babytato.link/" target="_blank" rel="noopener noreferrer">
-          <span class="admin-nav-tile__label">public site</span>
-          <span class="admin-nav-tile__hint">babytato.link ↗</span>
-        </a>
-      </li>
-      <li>
-        <span class="admin-nav-tile" aria-disabled="true">
-          <span class="admin-nav-tile__label">site info</span>
-          <span class="admin-nav-tile__hint">coming soon</span>
-        </span>
-      </li>
-      <li>
-        <a class="admin-nav-tile" href={adminNewsPath()}>
-          <span class="admin-nav-tile__label">news</span>
-          <span class="admin-nav-tile__hint">お知らせ</span>
-        </a>
-      </li>
-      <li>
-        <a class="admin-nav-tile" href={adminLinksPath()}>
-          <span class="admin-nav-tile__label">links</span>
-          <span class="admin-nav-tile__hint">SNS / 公式リンク</span>
-        </a>
-      </li>
-      <li>
-        <a class="admin-nav-tile" href={adminDiscographyPath()}>
-          <span class="admin-nav-tile__label">discography</span>
-          <span class="admin-nav-tile__hint">releases</span>
-        </a>
-      </li>
-    </ul>
-  </section>
+<AdminLayout wide>
+  <div class="admin-tabs admin-tabs--shell" role="tablist" aria-label="manage sections">
+    <button type="button" class="admin-tab is-active" data-admin-tab="overview" role="tab" aria-selected="true" id="tab-overview" aria-controls="panel-overview">
+      overview
+    </button>
+    <button type="button" class="admin-tab" data-admin-tab="news" role="tab" aria-selected="false" id="tab-news" aria-controls="panel-news">
+      news
+    </button>
+    <button type="button" class="admin-tab" data-admin-tab="links" role="tab" aria-selected="false" id="tab-links" aria-controls="panel-links">
+      links
+    </button>
+    <button type="button" class="admin-tab" data-admin-tab="discography" role="tab" aria-selected="false" id="tab-discography" aria-controls="panel-discography">
+      discography
+    </button>
+  </div>
 
-  <section class="admin-card">
-    <h2 class="admin-card-title">session</h2>
-    <p id="session-user" class="admin-loading">checking…</p>
-  </section>
+  <div id="panel-overview" class="admin-tab-panel" role="tabpanel" data-admin-panel="overview" aria-labelledby="tab-overview">
+    <section class="admin-card admin-dashboard">
+      <h2 class="admin-card-title">edit</h2>
+      <p class="admin-hint">news は保存直後に公開されます。links / discography は GitHub に commit され、Pages が再ビルドします。</p>
+      <ul class="admin-nav-grid" aria-label="クイックリンク">
+        <li>
+          <a class="admin-nav-tile" href="https://babytato.link/" target="_blank" rel="noopener noreferrer">
+            <span class="admin-nav-tile__label">public site</span>
+            <span class="admin-nav-tile__hint">babytato.link ↗</span>
+          </a>
+        </li>
+        <li>
+          <span class="admin-nav-tile" aria-disabled="true">
+            <span class="admin-nav-tile__label">site info</span>
+            <span class="admin-nav-tile__hint">coming soon</span>
+          </span>
+        </li>
+        <li>
+          <button type="button" class="admin-nav-tile" data-admin-jump="news">
+            <span class="admin-nav-tile__label">news</span>
+            <span class="admin-nav-tile__hint">お知らせ</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="admin-nav-tile" data-admin-jump="links">
+            <span class="admin-nav-tile__label">links</span>
+            <span class="admin-nav-tile__hint">SNS / 公式リンク</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="admin-nav-tile" data-admin-jump="discography">
+            <span class="admin-nav-tile__label">discography</span>
+            <span class="admin-nav-tile__hint">releases</span>
+          </button>
+        </li>
+      </ul>
+    </section>
+
+    <section class="admin-card">
+      <h2 class="admin-card-title">session</h2>
+      <p id="session-user" class="admin-loading">checking…</p>
+    </section>
+  </div>
+
+  <div id="panel-news" class="admin-tab-panel" role="tabpanel" data-admin-panel="news" aria-labelledby="tab-news" hidden>
+    <NewsPanel />
+  </div>
+
+  <div id="panel-links" class="admin-tab-panel" role="tabpanel" data-admin-panel="links" aria-labelledby="tab-links" hidden>
+    <LinksPanel />
+  </div>
+
+  <div id="panel-discography" class="admin-tab-panel" role="tabpanel" data-admin-panel="discography" aria-labelledby="tab-discography" hidden>
+    <DiscographyPanel />
+  </div>
 </AdminLayout>
 
 <script>
   import { requireSession } from "../../scripts/admin/client";
+  import { initAdminTabs, type AdminTabId } from "../../scripts/admin/tabs";
+  import { initNewsList } from "../../scripts/admin/news-list";
+  import { initLinksEditor } from "../../scripts/admin/links";
+  import { initDiscographyEditor } from "../../scripts/admin/discography";
+
+  const loaded = new Set<AdminTabId>();
+
+  async function ensurePanel(tab: AdminTabId) {
+    if (loaded.has(tab)) return;
+    loaded.add(tab);
+
+    if (tab === "news") {
+      await initNewsList();
+      return;
+    }
+    if (tab === "links") {
+      await initLinksEditor();
+      return;
+    }
+    if (tab === "discography") {
+      await initDiscographyEditor();
+    }
+  }
 
   async function init() {
     try {
@@ -57,6 +111,22 @@ import { adminDiscographyPath, adminLinksPath, adminNewsPath } from "../../lib/a
       if (userEl && session.username) {
         userEl.textContent = `${session.username} logged in`;
         userEl.className = "";
+      }
+
+      const initial = initAdminTabs({
+        onChange: (tab) => {
+          ensurePanel(tab).catch(() => undefined);
+        },
+      });
+
+      await ensurePanel(initial);
+
+      for (const jump of document.querySelectorAll<HTMLButtonElement>("[data-admin-jump]")) {
+        jump.addEventListener("click", () => {
+          const tab = jump.dataset.adminJump as AdminTabId | undefined;
+          if (!tab) return;
+          document.querySelector<HTMLButtonElement>(`[data-admin-tab="${tab}"]`)?.click();
+        });
       }
     } catch {
       // redirect handled in requireSession

@@ -3,6 +3,7 @@ import {
   isManageHost,
   isManagePassthroughPath,
   manageAdminInternalPath,
+  manageAdminTabRedirect,
   MANAGE_HOST,
 } from "./lib/manage-host";
 import {
@@ -115,11 +116,33 @@ export async function onRequest(context: MiddlewareContext): Promise<Response> {
   }
 
   if (pathname === "/admin/" || pathname === "/admin") {
-    return Response.redirect(new URL("/", url.origin).toString(), 302);
+    const dest = new URL("/", url.origin);
+    dest.search = url.search;
+    return Response.redirect(dest.toString(), 302);
+  }
+
+  const adminSection = pathname.match(/^\/admin\/(news|links|discography)\/?$/);
+  if (adminSection) {
+    return Response.redirect(new URL(`/?tab=${adminSection[1]}`, url.origin).toString(), 302);
+  }
+
+  if (pathname.startsWith("/admin/news/edit")) {
+    const dest = new URL("/news/edit/", url.origin);
+    dest.search = url.search;
+    return Response.redirect(dest.toString(), 302);
   }
 
   if (pathname.startsWith("/admin/")) {
     return Response.redirect(new URL("/", url.origin).toString(), 302);
+  }
+
+  const tabRedirect = manageAdminTabRedirect(pathname);
+  if (tabRedirect) {
+    const loggedIn = await hasValidSession(request, env.SESSION_SECRET?.trim());
+    if (!loggedIn) {
+      return next(rewriteRequest(request, "/admin/login/"));
+    }
+    return Response.redirect(new URL(tabRedirect, url.origin).toString(), 302);
   }
 
   const adminRoute = manageAdminInternalPath(pathname);

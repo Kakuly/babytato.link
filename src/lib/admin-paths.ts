@@ -1,24 +1,32 @@
 /** Must match functions/lib/manage-host.ts */
 export const MANAGE_HOST = "manage.babytato.link";
 
+export type AdminTabId = "overview" | "news" | "links" | "discography";
+
 export function isManageHost(hostname = globalThis.location?.hostname ?? ""): boolean {
   return hostname === MANAGE_HOST;
+}
+
+function adminRoot(): string {
+  return isManageHost() ? "/" : "/admin/";
 }
 
 export function adminLoginPath(): string {
   return isManageHost() ? "/" : "/admin/login/";
 }
 
-export function adminDashboardPath(): string {
-  return isManageHost() ? "/" : "/admin/";
+export function adminDashboardPath(tab?: AdminTabId): string {
+  const root = adminRoot();
+  if (!tab || tab === "overview") return root;
+  return `${root}?tab=${tab}`;
 }
 
 export function adminLinksPath(): string {
-  return isManageHost() ? "/links/" : "/admin/links/";
+  return adminDashboardPath("links");
 }
 
 export function adminNewsPath(): string {
-  return isManageHost() ? "/news/" : "/admin/news/";
+  return adminDashboardPath("news");
 }
 
 export function adminNewsEditPath(slug?: string): string {
@@ -27,5 +35,5 @@ export function adminNewsEditPath(slug?: string): string {
 }
 
 export function adminDiscographyPath(): string {
-  return isManageHost() ? "/discography/" : "/admin/discography/";
+  return adminDashboardPath("discography");
 }

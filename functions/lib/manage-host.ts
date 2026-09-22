@@ -15,16 +15,28 @@ export function cookieDomain(hostname: string): string | null {
 
 const ASSET_PREFIXES = ["/_astro/", "/favicon.svg", "/tato-", "/holo-field.png", "/releases/"];
 
-/** Public manage-host prefixes rewritten to internal /admin/* routes. */
-const MANAGE_ADMIN_PREFIXES = ["/links", "/news", "/discography"] as const;
+const SECTION_TABS = {
+  "/news": "news",
+  "/links": "links",
+  "/discography": "discography",
+} as const;
 
-export function manageAdminInternalPath(pathname: string): string | null {
-  for (const prefix of MANAGE_ADMIN_PREFIXES) {
-    if (pathname === prefix || pathname === `${prefix}/` || pathname.startsWith(`${prefix}/`)) {
-      const rest = pathname === prefix ? "/" : pathname.slice(prefix.length) || "/";
-      const internal = `/admin${prefix}${rest === "/" ? "/" : rest}`;
-      return internal.endsWith("/") ? internal : `${internal}/`;
+type SectionTab = (typeof SECTION_TABS)[keyof typeof SECTION_TABS];
+
+/** Deep-link paths on manage host that should open a dashboard tab. */
+export function manageAdminTabRedirect(pathname: string): `/?tab=${SectionTab}` | null {
+  for (const [prefix, tab] of Object.entries(SECTION_TABS) as [keyof typeof SECTION_TABS, SectionTab][]) {
+    if (pathname === prefix || pathname === `${prefix}/`) {
+      return `/?tab=${tab}`;
     }
+  }
+  return null;
+}
+
+/** Nested manage-host routes rewritten to internal /admin/* pages (e.g. news edit). */
+export function manageAdminInternalPath(pathname: string): string | null {
+  if (pathname === "/news/edit" || pathname === "/news/edit/" || pathname.startsWith("/news/edit/")) {
+    return "/admin/news/edit/";
   }
   return null;
 }

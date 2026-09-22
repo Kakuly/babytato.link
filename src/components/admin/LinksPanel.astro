@@ -1,0 +1,54 @@
+---
+import { socialIconSvg } from "../../lib/social-icons";
+import type { SocialPlatform } from "../../data/links";
+
+const TEMPLATES: { id: SocialPlatform; label: string; placeholder: string }[] = [
+  { id: "x", label: "X", placeholder: "https://x.com/…" },
+  { id: "instagram", label: "Instagram", placeholder: "https://www.instagram.com/…" },
+  { id: "youtube", label: "YouTube", placeholder: "https://www.youtube.com/@…" },
+  { id: "soundcloud", label: "SoundCloud", placeholder: "https://soundcloud.com/…" },
+  { id: "tiktok", label: "TikTok", placeholder: "https://www.tiktok.com/@…" },
+  { id: "fanbox", label: "FANBOX", placeholder: "https://….fanbox.cc/" },
+  { id: "booth", label: "BOOTH", placeholder: "https://….booth.pm/" },
+  { id: "spotify", label: "Spotify", placeholder: "https://open.spotify.com/…" },
+  { id: "appleMusic", label: "Apple Music", placeholder: "https://music.apple.com/…" },
+  { id: "bandcamp", label: "Bandcamp", placeholder: "https://….bandcamp.com" },
+  { id: "discord", label: "Discord", placeholder: "https://discord.gg/…" },
+];
+---
+
+<section class="admin-card">
+  <h2 class="admin-card-title">SNS links</h2>
+  <p class="admin-hint">
+    公開サイトに出す公式リンクです。URL を入れると表示、空欄のままなら非表示。保存すると GitHub に commit され、Pages が再ビルドします。
+  </p>
+
+  <form id="links-form" class="admin-links-list">
+    {
+      TEMPLATES.map((t) => (
+        <div class="admin-link-row">
+          <span class="admin-link-row__icon" set:html={socialIconSvg(t.id)} aria-hidden="true" />
+          <div class="admin-field">
+            <label for={`link-${t.id}`}>{t.label}</label>
+            <input
+              id={`link-${t.id}`}
+              name={t.id}
+              type="text"
+              inputmode="url"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder={t.placeholder}
+            />
+          </div>
+        </div>
+      ))
+    }
+
+    <div class="admin-actions">
+      <button type="submit" class="admin-btn admin-btn-primary" id="links-save">save</button>
+      <button type="button" class="admin-btn" id="links-reload">reload</button>
+    </div>
+  </form>
+
+  <p id="links-status" class="admin-status" aria-live="polite"></p>
+</section>
